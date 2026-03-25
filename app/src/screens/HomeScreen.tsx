@@ -8,9 +8,10 @@ type Props = {
   constraints: Constraint[];
   mealOptions: MealOption[];
   onOpenSettings: () => void;
+  onSelectMeal: (meal: MealOption) => void;
 };
 
-export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, onOpenSettings }: Props) {
+export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, onOpenSettings, onSelectMeal }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.header}>
@@ -47,7 +48,7 @@ export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, onOpen
           <Text style={styles.mealIndex}>Option {index + 1}</Text>
           <Text style={styles.mealTitle}>{meal.title}</Text>
           <Text style={styles.mealDescription}>{meal.description}</Text>
-          <TouchableOpacity style={styles.primaryButton}>
+          <TouchableOpacity style={styles.primaryButton} onPress={() => onSelectMeal(meal)}>
             <Text style={styles.primaryButtonText}>이걸로 갈게요</Text>
           </TouchableOpacity>
         </View>
