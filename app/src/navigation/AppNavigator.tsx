@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { BottomTabBar } from '../components/BottomTabBar';
 import { useProfileState } from '../hooks/useProfileState';
 import { HomeScreen } from '../screens/HomeScreen';
@@ -9,6 +9,7 @@ import { LogScreen } from '../screens/LogScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { SummaryScreen } from '../screens/SummaryScreen';
+import { colors } from '../styles/theme';
 import { MealOption } from '../types/app';
 import { MainTabKey, RootStackParamList } from '../types/navigation';
 
@@ -86,10 +87,23 @@ function MainTabs({
   );
 }
 
+function SplashScreen() {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background, gap: 12 }}>
+      <ActivityIndicator size="large" color={colors.greenStrong} />
+      <Text style={{ color: colors.textMuted, fontSize: 15 }}>식단메이트 데이터를 불러오는 중입니다.</Text>
+    </View>
+  );
+}
+
 export function AppNavigator() {
   const [currentTab, setCurrentTab] = useState<MainTabKey>('home');
   const [selectedMeal, setSelectedMeal] = useState<MealOption | null>(null);
-  const { goal, eatingStyle, constraints, selectedResult, mealOptions, weeklyStats, mealLogs, actions } = useProfileState();
+  const { goal, eatingStyle, constraints, selectedResult, mealOptions, weeklyStats, mealLogs, hydrated, actions } = useProfileState();
+
+  if (!hydrated) {
+    return <SplashScreen />;
+  }
 
   return (
     <NavigationContainer>

@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createMealLog, getMealOptions, getWeeklyStats } from '../data/options';
+import { loadAppState, saveAppState } from '../storage/appStorage';
 import { Constraint, EatingStyle, Goal, LogResult, MealLog, MealOption, UserProfile } from '../types/app';
 
 const initialLogs: MealLog[] = [
@@ -23,6 +24,30 @@ export function useProfileState() {
   const [constraints, setConstraints] = useState<Constraint[]>(['편의점 가능', '예산 민감']);
   const [selectedResult, setSelectedResult] = useState<LogResult | null>(null);
   const [mealLogs, setMealLogs] = useState<MealLog[]>(initialLogs);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const saved = await loadAppState();
+      if (saved) {
+        setGoal(saved.goal);
+        setEatingStyle(saved.eatingStyle);
+        setConstraints(saved.constraints);
+        setMealLogs(saved.mealLogs.length > 0 ? saved.mealLogs : initialLogs);
+      }
+      setHydrated(true);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    void saveAppState({
+      goal,
+      eatingStyle,
+      constraints,
+      mealLogs,
+    });
+  }, [goal, eatingStyle, constraints, mealLogs, hydrated]);
 
   const profile: UserProfile = { goal, eatingStyle, constraints };
   const mealOptions = useMemo(() => getMealOptions(eatingStyle), [eatingStyle]);
@@ -34,7 +59,7 @@ export function useProfileState() {
     );
   };
 
-  const saveMealLog = (meal: MealOption | null, result: LogResult | null) => {
+  const saveMealLogEntry = (meal: MealOption | null, result: LogResult | null) => {
     if (!meal || !result) return false;
     const log = createMealLog(meal.title, result);
     setMealLogs((prev) => [log, ...prev].slice(0, 20));
@@ -50,12 +75,13 @@ export function useProfileState() {
     mealOptions,
     weeklyStats,
     mealLogs,
+    hydrated,
     actions: {
       setGoal,
       setEatingStyle,
       toggleConstraint,
       setSelectedResult,
-      saveMealLog,
+      saveMealLog: saveMealLogEntry,
     },
   };
 }
