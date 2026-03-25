@@ -8,6 +8,7 @@ type Props = {
   onSelectResult: (result: LogResult) => void;
   onBack: () => void;
   onComplete: () => void;
+  onOpenSummary: () => void;
 };
 
 const resultOptions: { label: LogResult; helper: string }[] = [
@@ -16,7 +17,7 @@ const resultOptions: { label: LogResult; helper: string }[] = [
   { label: '벗어났어요', helper: '야식, 과식, 다른 메뉴 선택 등으로 흐름이 무너진 상태입니다.' },
 ];
 
-export function LogScreen({ selectedMeal, selectedResult, onSelectResult, onBack, onComplete }: Props) {
+export function LogScreen({ selectedMeal, selectedResult, onSelectResult, onBack, onComplete, onOpenSummary }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.header}>
@@ -73,6 +74,14 @@ export function LogScreen({ selectedMeal, selectedResult, onSelectResult, onBack
         onPress={onComplete}
       >
         <Text style={styles.primaryButtonText}>기록 완료하고 홈으로</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.secondaryCta, !selectedResult && styles.primaryButtonDisabled]}
+        disabled={!selectedResult}
+        onPress={onOpenSummary}
+      >
+        <Text style={styles.secondaryCtaText}>주간 요약 보기</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -216,12 +225,24 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 15,
     alignItems: 'center',
+    marginBottom: 10,
   },
   primaryButtonDisabled: {
     opacity: 0.45,
   },
   primaryButtonText: {
     color: '#17301B',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  secondaryCta: {
+    borderRadius: 16,
+    paddingVertical: 15,
+    alignItems: 'center',
+    backgroundColor: colors.white,
+  },
+  secondaryCtaText: {
+    color: colors.greenStrong,
     fontSize: 16,
     fontWeight: '700',
   },

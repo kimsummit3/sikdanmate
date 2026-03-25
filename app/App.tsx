@@ -5,6 +5,7 @@ import { getMealOptions } from './src/data/options';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { LogScreen } from './src/screens/LogScreen';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
+import { SummaryScreen } from './src/screens/SummaryScreen';
 import { colors } from './src/styles/theme';
 import { Constraint, EatingStyle, Goal, LogResult, MealOption, Screen } from './src/types/app';
 
@@ -28,10 +29,6 @@ export default function App() {
     setSelectedMeal(meal);
     setSelectedResult(null);
     setScreen('log');
-  };
-
-  const handleCompleteLog = () => {
-    setScreen('home');
   };
 
   return (
@@ -66,7 +63,16 @@ export default function App() {
           selectedResult={selectedResult}
           onSelectResult={setSelectedResult}
           onBack={() => setScreen('home')}
-          onComplete={handleCompleteLog}
+          onComplete={() => setScreen('home')}
+          onOpenSummary={() => setScreen('summary')}
+        />
+      )}
+
+      {screen === 'summary' && (
+        <SummaryScreen
+          goal={goal}
+          lastResult={selectedResult}
+          onBackHome={() => setScreen('home')}
         />
       )}
     </SafeAreaView>
