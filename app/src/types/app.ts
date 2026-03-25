@@ -7,4 +7,20 @@ export type LogResult = '잘 지켰어요' | '비슷해요' | '벗어났어요';
 export type MealOption = {
   title: string;
   description: string;
+  tag: string;
+  context: string;
+};
+
+export type WeeklyStats = {
+  recordRate: number;
+  consistencyRate: number;
+  recoveryRate: number;
+  weeklyPoint: string;
+  suggestion: string;
+};
+
+export type UserProfile = {
+  goal: Goal;
+  eatingStyle: EatingStyle;
+  constraints: Constraint[];
 };

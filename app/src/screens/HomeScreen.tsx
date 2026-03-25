@@ -45,8 +45,12 @@ export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, onOpen
 
       {mealOptions.map((meal, index) => (
         <View key={meal.title} style={styles.mealCard}>
-          <Text style={styles.mealIndex}>Option {index + 1}</Text>
+          <View style={styles.mealMetaRow}>
+            <Text style={styles.mealIndex}>Option {index + 1}</Text>
+            <View style={styles.mealTag}><Text style={styles.mealTagText}>{meal.tag}</Text></View>
+          </View>
           <Text style={styles.mealTitle}>{meal.title}</Text>
+          <Text style={styles.mealContext}>{meal.context}</Text>
           <Text style={styles.mealDescription}>{meal.description}</Text>
           <TouchableOpacity style={styles.primaryButton} onPress={() => onSelectMeal(meal)}>
             <Text style={styles.primaryButtonText}>이걸로 갈게요</Text>
@@ -60,201 +64,41 @@ export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, onOpen
         <Text style={styles.recoveryDescription}>
           식단메이트는 실패를 기록하는 앱이 아니라, 복귀를 설계하는 앱입니다.
         </Text>
-        <View style={styles.recoveryActions}>
-          <TouchableOpacity style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>잘 지켰어요</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>조금 벗어났어요</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 32,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 24,
-  },
-  eyebrow: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    color: colors.greenDeep,
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: 8,
-    lineHeight: 40,
-  },
-  subtitle: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: colors.textMuted,
-    maxWidth: 300,
-  },
-  badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: colors.greenLight,
-  },
-  badgeText: {
-    color: '#335339',
-    fontWeight: '700',
-  },
-  card: {
-    backgroundColor: colors.white,
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 24,
-    shadowColor: colors.greenDeep,
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 2,
-  },
-  cardLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.greenDeep,
-    marginBottom: 10,
-  },
-  cardTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: colors.text,
-    lineHeight: 30,
-    marginBottom: 8,
-  },
-  cardDescription: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: colors.textMuted,
-    marginBottom: 14,
-  },
-  optionRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  optionChip: {
-    backgroundColor: colors.chip,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  optionChipText: {
-    color: '#335339',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  sectionMeta: {
-    color: colors.textSoft,
-    fontWeight: '600',
-  },
-  mealCard: {
-    backgroundColor: colors.white,
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 14,
-    shadowColor: colors.greenDeep,
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 2,
-  },
-  mealIndex: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.accent,
-    marginBottom: 8,
-  },
-  mealTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
-    lineHeight: 28,
-    marginBottom: 8,
-  },
-  mealDescription: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: colors.textMuted,
-    marginBottom: 16,
-  },
-  primaryButton: {
-    backgroundColor: colors.greenButton,
-    borderRadius: 16,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  primaryButtonText: {
-    color: '#17301B',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  recoveryCard: {
-    backgroundColor: colors.greenSurface,
-    borderRadius: 24,
-    padding: 20,
-    marginTop: 8,
-  },
-  recoveryLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.greenDeep,
-    marginBottom: 8,
-  },
-  recoveryTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#1E3221',
-    lineHeight: 30,
-    marginBottom: 10,
-  },
-  recoveryDescription: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: '#4E6151',
-    marginBottom: 16,
-  },
-  recoveryActions: {
-    gap: 10,
-  },
-  secondaryButton: {
-    backgroundColor: colors.white,
-    borderRadius: 16,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  secondaryButtonText: {
-    color: '#29422E',
-    fontSize: 15,
-    fontWeight: '700',
-  },
+  content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 32 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },
+  eyebrow: { fontSize: 12, fontWeight: '700', letterSpacing: 1.2, color: colors.greenDeep, marginBottom: 8 },
+  title: { fontSize: 32, fontWeight: '800', color: colors.text, marginBottom: 8, lineHeight: 40 },
+  subtitle: { fontSize: 16, lineHeight: 24, color: colors.textMuted, maxWidth: 300 },
+  badge: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.greenLight },
+  badgeText: { color: '#335339', fontWeight: '700' },
+  card: { backgroundColor: colors.white, borderRadius: 24, padding: 20, marginBottom: 24, shadowColor: colors.greenDeep, shadowOpacity: 0.08, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 2 },
+  cardLabel: { fontSize: 12, fontWeight: '700', color: colors.greenDeep, marginBottom: 10 },
+  cardTitle: { fontSize: 22, fontWeight: '700', color: colors.text, lineHeight: 30, marginBottom: 8 },
+  cardDescription: { fontSize: 15, lineHeight: 22, color: colors.textMuted, marginBottom: 14 },
+  optionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  optionChip: { backgroundColor: colors.chip, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
+  optionChipText: { color: '#335339', fontSize: 13, fontWeight: '600' },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 8 },
+  sectionTitle: { fontSize: 22, fontWeight: '700', color: colors.text },
+  sectionMeta: { color: colors.textSoft, fontWeight: '600' },
+  mealCard: { backgroundColor: colors.white, borderRadius: 24, padding: 20, marginBottom: 14, shadowColor: colors.greenDeep, shadowOpacity: 0.06, shadowRadius: 16, shadowOffset: { width: 0, height: 6 }, elevation: 2 },
+  mealMetaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  mealIndex: { fontSize: 12, fontWeight: '700', color: colors.accent },
+  mealTag: { backgroundColor: colors.greenSurface, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6 },
+  mealTagText: { color: colors.greenStrong, fontSize: 12, fontWeight: '700' },
+  mealTitle: { fontSize: 20, fontWeight: '700', color: colors.text, lineHeight: 28, marginBottom: 6 },
+  mealContext: { fontSize: 13, color: colors.greenDeep, fontWeight: '600', marginBottom: 8 },
+  mealDescription: { fontSize: 15, lineHeight: 22, color: colors.textMuted, marginBottom: 16 },
+  primaryButton: { backgroundColor: colors.greenButton, borderRadius: 16, paddingVertical: 14, alignItems: 'center' },
+  primaryButtonText: { color: '#17301B', fontSize: 16, fontWeight: '700' },
+  recoveryCard: { backgroundColor: colors.greenSurface, borderRadius: 24, padding: 20, marginTop: 8 },
+  recoveryLabel: { fontSize: 12, fontWeight: '700', color: colors.greenDeep, marginBottom: 8 },
+  recoveryTitle: { fontSize: 22, fontWeight: '800', color: '#1E3221', lineHeight: 30, marginBottom: 10 },
+  recoveryDescription: { fontSize: 15, lineHeight: 22, color: '#4E6151' },
 });

@@ -2,14 +2,14 @@ import { StatusBar } from 'expo-status-bar';
 import { useMemo, useState } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { BottomTabBar } from './src/components/BottomTabBar';
-import { getMealOptions } from './src/data/options';
+import { getMealOptions, getWeeklyStats } from './src/data/options';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { LogScreen } from './src/screens/LogScreen';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { SummaryScreen } from './src/screens/SummaryScreen';
 import { colors } from './src/styles/theme';
-import { Constraint, EatingStyle, Goal, LogResult, MealOption, Screen } from './src/types/app';
+import { Constraint, EatingStyle, Goal, LogResult, MealOption, Screen, UserProfile } from './src/types/app';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('onboarding');
@@ -19,7 +19,9 @@ export default function App() {
   const [selectedMeal, setSelectedMeal] = useState<MealOption | null>(null);
   const [selectedResult, setSelectedResult] = useState<LogResult | null>(null);
 
+  const profile: UserProfile = { goal, eatingStyle, constraints };
   const mealOptions = useMemo(() => getMealOptions(eatingStyle), [eatingStyle]);
+  const weeklyStats = useMemo(() => getWeeklyStats(profile, selectedResult), [profile, selectedResult]);
 
   const toggleConstraint = (item: Constraint) => {
     setConstraints((prev) =>
@@ -77,6 +79,7 @@ export default function App() {
           <SummaryScreen
             goal={goal}
             lastResult={selectedResult}
+            weeklyStats={weeklyStats}
             onBackHome={() => setScreen('home')}
           />
         )}
