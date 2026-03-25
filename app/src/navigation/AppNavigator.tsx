@@ -1,16 +1,16 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useState } from 'react';
+import { View } from 'react-native';
+import { BottomTabBar } from '../components/BottomTabBar';
+import { useProfileState } from '../hooks/useProfileState';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LogScreen } from '../screens/LogScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { SummaryScreen } from '../screens/SummaryScreen';
-import { BottomTabBar } from '../components/BottomTabBar';
-import { useProfileState } from '../hooks/useProfileState';
 import { MealOption } from '../types/app';
 import { MainTabKey, RootStackParamList } from '../types/navigation';
-import { View } from 'react-native';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -22,6 +22,7 @@ function MainTabs({
   constraints,
   mealOptions,
   weeklyStats,
+  mealLogs,
   selectedResult,
   onOpenSettings,
   onSelectMeal,
@@ -37,6 +38,7 @@ function MainTabs({
   constraints: any;
   mealOptions: any;
   weeklyStats: any;
+  mealLogs: any;
   selectedResult: any;
   onOpenSettings: () => void;
   onSelectMeal: (meal: MealOption) => void;
@@ -59,7 +61,13 @@ function MainTabs({
           />
         )}
         {currentTab === 'summary' && (
-          <SummaryScreen goal={goal} lastResult={selectedResult} weeklyStats={weeklyStats} onBackHome={onBackHome} />
+          <SummaryScreen
+            goal={goal}
+            lastResult={selectedResult}
+            weeklyStats={weeklyStats}
+            mealLogs={mealLogs}
+            onBackHome={onBackHome}
+          />
         )}
         {currentTab === 'settings' && (
           <SettingsScreen
@@ -81,7 +89,7 @@ function MainTabs({
 export function AppNavigator() {
   const [currentTab, setCurrentTab] = useState<MainTabKey>('home');
   const [selectedMeal, setSelectedMeal] = useState<MealOption | null>(null);
-  const { goal, eatingStyle, constraints, selectedResult, mealOptions, weeklyStats, actions } = useProfileState();
+  const { goal, eatingStyle, constraints, selectedResult, mealOptions, weeklyStats, mealLogs, actions } = useProfileState();
 
   return (
     <NavigationContainer>
@@ -109,6 +117,7 @@ export function AppNavigator() {
               constraints={constraints}
               mealOptions={mealOptions}
               weeklyStats={weeklyStats}
+              mealLogs={mealLogs}
               selectedResult={selectedResult}
               onOpenSettings={() => setCurrentTab('settings')}
               onSelectMeal={(meal) => {
@@ -130,10 +139,16 @@ export function AppNavigator() {
               selectedResult={selectedResult}
               onSelectResult={actions.setSelectedResult}
               onBack={() => navigation.goBack()}
-              onComplete={() => navigation.goBack()}
+              onComplete={() => {
+                const saved = actions.saveMealLog(route.params?.meal ?? selectedMeal, selectedResult);
+                if (saved) navigation.goBack();
+              }}
               onOpenSummary={() => {
-                setCurrentTab('summary');
-                navigation.replace('MainTabs');
+                const saved = actions.saveMealLog(route.params?.meal ?? selectedMeal, selectedResult);
+                if (saved) {
+                  setCurrentTab('summary');
+                  navigation.replace('MainTabs');
+                }
               }}
             />
           )}

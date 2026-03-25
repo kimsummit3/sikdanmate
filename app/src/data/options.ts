@@ -1,4 +1,4 @@
-import { Constraint, EatingStyle, Goal, LogResult, MealOption, UserProfile, WeeklyStats } from '../types/app';
+import { Constraint, EatingStyle, Goal, LogResult, MealLog, MealOption, UserProfile, WeeklyStats } from '../types/app';
 
 export const goalOptions: Goal[] = ['감량', '유지', '건강 식습관'];
 export const styleOptions: EatingStyle[] = ['일반식 중심', '간편식 중심', '외식 많음'];
@@ -55,45 +55,52 @@ export function getMealOptions(eatingStyle: EatingStyle): MealOption[] {
   ];
 }
 
-export function getWeeklyStats(profile: UserProfile, lastResult: LogResult | null): WeeklyStats {
-  const base = {
-    recordRate: 71,
-    consistencyRate: profile.goal === '감량' ? 64 : 68,
-    recoveryRate: 80,
-  };
+export function getWeeklyStats(profile: UserProfile, logs: MealLog[]): WeeklyStats {
+  const totalTargetMeals = 7;
+  const recordRate = Math.min(100, Math.round((logs.length / totalTargetMeals) * 100));
+  const onTrackCount = logs.filter((log) => log.result === '잘 지켰어요').length;
+  const similarCount = logs.filter((log) => log.result === '비슷해요').length;
+  const offTrackCount = logs.filter((log) => log.result === '벗어났어요').length;
+
+  const consistencyScore = logs.length === 0 ? 0 : Math.round(((onTrackCount * 1 + similarCount * 0.7) / logs.length) * 100);
+  const recoveryOpportunities = Math.max(offTrackCount, 1);
+  const recoverySuccess = Math.max(similarCount + onTrackCount - 1, 0);
+  const recoveryRate = logs.length === 0 ? 0 : Math.min(100, Math.round((recoverySuccess / recoveryOpportunities) * 100));
+
+  let weeklyPoint = '기록이 아직 적습니다. 먼저 3회 이상 기록을 만드는 것이 중요합니다.';
+  let suggestion = '이번 주에는 최소 3번만 기록하는 것을 목표로 잡아 보세요.';
 
   if (profile.eatingStyle === '외식 많음') {
-    return {
-      ...base,
-      weeklyPoint: '외식 상황에서도 무너지지 않는 점심 선택이 핵심입니다.',
-      suggestion:
-        lastResult === '벗어났어요'
-          ? '다음 주엔 점심 한 끼만이라도 반복 가능한 메뉴 2개를 고정해 보세요.'
-          : '잘 맞는 외식 메뉴를 2~3개로 좁혀서 결정 피로를 더 줄여보세요.',
-    };
-  }
-
-  if (profile.eatingStyle === '간편식 중심') {
-    return {
-      ...base,
-      recordRate: 76,
-      consistencyRate: 69,
-      weeklyPoint: '준비 없는 끼니를 얼마나 안정적으로 넘기느냐가 중요합니다.',
-      suggestion:
-        lastResult === '벗어났어요'
-          ? '다음 주엔 편의점/간편식 안전 메뉴를 미리 정해 두는 것이 좋습니다.'
-          : '지금 잘 맞는 간편식을 아침과 점심 루틴으로 고정해 보세요.',
-    };
+    weeklyPoint = '외식 상황에서도 무너지지 않는 점심 선택이 핵심입니다.';
+    suggestion = offTrackCount > 0
+      ? '다음 주엔 점심 한 끼만이라도 반복 가능한 메뉴 2개를 고정해 보세요.'
+      : '잘 맞는 외식 메뉴를 2~3개로 좁혀서 결정 피로를 더 줄여보세요.';
+  } else if (profile.eatingStyle === '간편식 중심') {
+    weeklyPoint = '준비 없는 끼니를 얼마나 안정적으로 넘기느냐가 중요합니다.';
+    suggestion = offTrackCount > 0
+      ? '다음 주엔 편의점/간편식 안전 메뉴를 미리 정해 두는 것이 좋습니다.'
+      : '지금 잘 맞는 간편식을 아침과 점심 루틴으로 고정해 보세요.';
+  } else if (logs.length > 0) {
+    weeklyPoint = '집밥 기반 루틴은 안정적이지만, 지루함 관리가 중요합니다.';
+    suggestion = offTrackCount > 0
+      ? '다음 주엔 저녁 루틴을 더 단순하게 줄여 복귀 난이도를 낮추세요.'
+      : '기본 식단 루틴은 유지하고, 한 끼만 변주를 넣는 식으로 지루함을 관리하세요.';
   }
 
   return {
-    ...base,
-    recordRate: 74,
-    consistencyRate: 72,
-    weeklyPoint: '집밥 기반 루틴은 안정적이지만, 지루함 관리가 중요합니다.',
-    suggestion:
-      lastResult === '벗어났어요'
-        ? '다음 주엔 저녁 루틴을 더 단순하게 줄여 복귀 난이도를 낮추세요.'
-        : '기본 식단 루틴은 유지하고, 한 끼만 변주를 넣는 식으로 지루함을 관리하세요.',
+    recordRate,
+    consistencyRate: consistencyScore,
+    recoveryRate,
+    weeklyPoint,
+    suggestion,
+  };
+}
+
+export function createMealLog(mealTitle: string, result: LogResult): MealLog {
+  return {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    mealTitle,
+    result,
+    createdAt: new Date().toISOString(),
   };
 }

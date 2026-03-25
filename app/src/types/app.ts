@@ -11,6 +11,13 @@ export type MealOption = {
   context: string;
 };
 
+export type MealLog = {
+  id: string;
+  mealTitle: string;
+  result: LogResult;
+  createdAt: string;
+};
+
 export type WeeklyStats = {
   recordRate: number;
   consistencyRate: number;

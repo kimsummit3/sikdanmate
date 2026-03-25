@@ -3,16 +3,17 @@ import { AppButton } from '../components/AppButton';
 import { AppHeader } from '../components/AppHeader';
 import { SurfaceCard } from '../components/SurfaceCard';
 import { colors } from '../styles/theme';
-import { Goal, LogResult, WeeklyStats } from '../types/app';
+import { Goal, LogResult, MealLog, WeeklyStats } from '../types/app';
 
 type Props = {
   goal: Goal;
   lastResult: LogResult | null;
   weeklyStats: WeeklyStats;
+  mealLogs: MealLog[];
   onBackHome: () => void;
 };
 
-export function SummaryScreen({ goal, lastResult, weeklyStats, onBackHome }: Props) {
+export function SummaryScreen({ goal, lastResult, weeklyStats, mealLogs, onBackHome }: Props) {
   const recoveryCopy =
     lastResult === '벗어났어요'
       ? '이번 주엔 흔들린 끼니가 있었지만, 다시 돌아오는 흐름이 더 중요합니다.'
@@ -36,23 +37,40 @@ export function SummaryScreen({ goal, lastResult, weeklyStats, onBackHome }: Pro
         <SurfaceCard style={styles.metricCard}>
           <Text style={styles.metricLabel}>기록률</Text>
           <Text style={styles.metricValue}>{weeklyStats.recordRate}%</Text>
-          <Text style={styles.metricHelper}>반복 사용 기반 기록 흐름</Text>
+          <Text style={styles.metricHelper}>최근 7회 목표 기준</Text>
         </SurfaceCard>
         <SurfaceCard style={styles.metricCard}>
           <Text style={styles.metricLabel}>유지율</Text>
           <Text style={styles.metricValue}>{weeklyStats.consistencyRate}%</Text>
-          <Text style={styles.metricHelper}>추천 흐름 유지 기준</Text>
+          <Text style={styles.metricHelper}>잘 지킴 + 비슷함 반영</Text>
         </SurfaceCard>
         <SurfaceCard style={styles.metricCard}>
           <Text style={styles.metricLabel}>복귀율</Text>
           <Text style={styles.metricValue}>{weeklyStats.recoveryRate}%</Text>
-          <Text style={styles.metricHelper}>무너진 뒤 다음 끼니 복귀</Text>
+          <Text style={styles.metricHelper}>벗어난 뒤 다시 복귀한 비율</Text>
         </SurfaceCard>
         <SurfaceCard style={styles.metricCard}>
           <Text style={styles.metricLabel}>이번 주 포인트</Text>
           <Text style={styles.metricValueText}>{weeklyStats.weeklyPoint}</Text>
         </SurfaceCard>
       </View>
+
+      <SurfaceCard style={styles.cardSpacing}>
+        <Text style={styles.cardLabel}>최근 기록</Text>
+        {mealLogs.length === 0 ? (
+          <Text style={styles.emptyText}>아직 기록이 없습니다.</Text>
+        ) : (
+          mealLogs.slice(0, 4).map((log) => (
+            <View key={log.id} style={styles.logRow}>
+              <View style={styles.logMain}>
+                <Text style={styles.logMeal}>{log.mealTitle}</Text>
+                <Text style={styles.logDate}>{new Date(log.createdAt).toLocaleDateString('ko-KR')}</Text>
+              </View>
+              <Text style={styles.logResult}>{log.result}</Text>
+            </View>
+          ))
+        )}
+      </SurfaceCard>
 
       <SurfaceCard style={styles.cardSpacing}>
         <Text style={styles.cardLabel}>다음 주 제안</Text>
@@ -65,68 +83,22 @@ export function SummaryScreen({ goal, lastResult, weeklyStats, onBackHome }: Pro
 }
 
 const styles = StyleSheet.create({
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 32,
-  },
-  cardSpacing: {
-    marginBottom: 18,
-  },
-  cardLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.greenDeep,
-    marginBottom: 10,
-  },
-  highlightTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#1E3221',
-    lineHeight: 32,
-    marginBottom: 8,
-  },
-  highlightDescription: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: '#4E6151',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 18,
-  },
-  metricCard: {
-    width: '48%',
-  },
-  metricLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.greenDeep,
-    marginBottom: 10,
-  },
-  metricValue: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  metricValueText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-    lineHeight: 25,
-  },
-  metricHelper: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: colors.textMuted,
-  },
-  noteTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: colors.text,
-    lineHeight: 30,
-  },
+  content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 32 },
+  cardSpacing: { marginBottom: 18 },
+  cardLabel: { fontSize: 12, fontWeight: '700', color: colors.greenDeep, marginBottom: 10 },
+  highlightTitle: { fontSize: 24, fontWeight: '800', color: '#1E3221', lineHeight: 32, marginBottom: 8 },
+  highlightDescription: { fontSize: 15, lineHeight: 22, color: '#4E6151' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 18 },
+  metricCard: { width: '48%' },
+  metricLabel: { fontSize: 12, fontWeight: '700', color: colors.greenDeep, marginBottom: 10 },
+  metricValue: { fontSize: 26, fontWeight: '800', color: colors.text, marginBottom: 8 },
+  metricValueText: { fontSize: 18, fontWeight: '700', color: colors.text, lineHeight: 25 },
+  metricHelper: { fontSize: 14, lineHeight: 20, color: colors.textMuted },
+  emptyText: { fontSize: 15, color: colors.textMuted },
+  logRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#EEF1EA' },
+  logMain: { flex: 1, paddingRight: 10 },
+  logMeal: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: 4 },
+  logDate: { fontSize: 12, color: colors.textSoft },
+  logResult: { fontSize: 13, fontWeight: '700', color: colors.greenStrong },
+  noteTitle: { fontSize: 22, fontWeight: '800', color: colors.text, lineHeight: 30 },
 });
