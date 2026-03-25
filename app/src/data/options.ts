@@ -19,6 +19,75 @@ export function getMealOptions(eatingStyle: EatingStyle, checkIn?: CheckInState)
   const budget = checkIn?.budget ?? '보통';
   const hunger = checkIn?.hunger ?? '보통';
   const craving = checkIn?.craving ?? '';
+  const adjustment = checkIn?.adjustmentMode ?? '기본';
+
+  if (adjustment === '더 저렴하게') {
+    return [
+      {
+        title: '김밥 + 삶은계란 + 무가당 두유',
+        description: '가격 부담을 낮추면서도 흐름을 크게 무너뜨리지 않는 절약형 선택입니다.',
+        tag: '절약 우선',
+        context: '보정 · 더 저렴하게',
+      },
+      {
+        title: '편의점 닭가슴살 + 바나나',
+        description: '최소 비용으로 단백질과 포만감을 어느 정도 챙기는 대체안입니다.',
+        tag: '가성비 대체',
+        context: '보정 · 저예산',
+      },
+    ];
+  }
+
+  if (adjustment === '더 가볍게') {
+    return [
+      {
+        title: '그릭요거트 + 바나나 + 견과류',
+        description: '소화 부담을 줄이면서도 허기를 과하게 남기지 않는 가벼운 선택입니다.',
+        tag: '가벼움 우선',
+        context: '보정 · 더 가볍게',
+      },
+      {
+        title: '연두부 + 샐러드 + 작은 밥',
+        description: '과식 없이 흐름만 유지하는 쪽에 맞춘 조정안입니다.',
+        tag: '조절 중심',
+        context: '보정 · 부담 낮춤',
+      },
+    ];
+  }
+
+  if (adjustment === '더 든든하게') {
+    return [
+      {
+        title: '닭가슴살 덮밥 + 된장국',
+        description: '포만감을 높이되 식단 흐름을 완전히 벗어나지 않는 든든한 선택입니다.',
+        tag: '든든함 우선',
+        context: '보정 · 더 든든하게',
+      },
+      {
+        title: '순두부찌개 + 밥 1공기 + 계란추가',
+        description: '배고픔이 큰 날에도 만족감을 주는 현실적인 한식 옵션입니다.',
+        tag: '포만감 강화',
+        context: '보정 · 한식',
+      },
+    ];
+  }
+
+  if (adjustment === '외식 중심') {
+    return [
+      {
+        title: '샤브샤브 1인 세트',
+        description: '외식이지만 채소와 단백질을 챙기기 쉬운 안정적인 선택입니다.',
+        tag: '외식 보정',
+        context: '보정 · 외식 중심',
+      },
+      {
+        title: '국밥 대신 순두부찌개 + 밥 조절',
+        description: '외식 메뉴를 유지하되 더 가볍게 조정한 선택안입니다.',
+        tag: '외식 대체',
+        context: '보정 · 한식 외식',
+      },
+    ];
+  }
 
   if (place === '집' && hunger === '많이 배고픔') {
     return [

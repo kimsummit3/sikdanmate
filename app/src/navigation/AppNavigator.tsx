@@ -32,6 +32,7 @@ function MainTabs({
   onSelectMeal,
   onOpenHistory,
   onOpenCheckIn,
+  onAdjustRecommendation,
   onSelectGoal,
   onSelectStyle,
   onToggleConstraint,
@@ -51,6 +52,7 @@ function MainTabs({
   onSelectMeal: (meal: MealOption) => void;
   onOpenHistory: () => void;
   onOpenCheckIn: () => void;
+  onAdjustRecommendation: (mode: any) => void;
   onSelectGoal: (goal: any) => void;
   onSelectStyle: (style: any) => void;
   onToggleConstraint: (constraint: any) => void;
@@ -71,6 +73,7 @@ function MainTabs({
             onSelectMeal={onSelectMeal}
             onOpenHistory={onOpenHistory}
             onOpenCheckIn={onOpenCheckIn}
+            onAdjustRecommendation={onAdjustRecommendation}
           />
         )}
         {currentTab === 'summary' && (
@@ -154,6 +157,7 @@ export function AppNavigator() {
               }}
               onOpenHistory={() => navigation.navigate('History')}
               onOpenCheckIn={() => navigation.navigate('CheckIn')}
+              onAdjustRecommendation={actions.setAdjustmentMode}
               onSelectGoal={actions.setGoal}
               onSelectStyle={actions.setEatingStyle}
               onToggleConstraint={actions.toggleConstraint}

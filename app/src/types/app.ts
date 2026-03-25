@@ -6,6 +6,7 @@ export type LogResult = '잘 지켰어요' | '비슷해요' | '벗어났어요';
 export type CheckInPlace = '집' | '밖';
 export type HungerLevel = '가벼움' | '보통' | '많이 배고픔';
 export type BudgetLevel = '절약' | '보통' | '여유 있음';
+export type AdjustmentMode = '기본' | '더 가볍게' | '더 든든하게' | '더 저렴하게' | '외식 중심';
 
 export type MealOption = {
   title: string;
@@ -26,6 +27,7 @@ export type CheckInState = {
   hunger: HungerLevel;
   budget: BudgetLevel;
   craving: string;
+  adjustmentMode: AdjustmentMode;
 };
 
 export type WeeklyStats = {

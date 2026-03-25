@@ -3,7 +3,7 @@ import { AppButton } from '../components/AppButton';
 import { AppHeader } from '../components/AppHeader';
 import { SurfaceCard } from '../components/SurfaceCard';
 import { colors } from '../styles/theme';
-import { CheckInState, Constraint, Goal, MealLog, MealOption, EatingStyle } from '../types/app';
+import { AdjustmentMode, CheckInState, Constraint, Goal, MealLog, MealOption, EatingStyle } from '../types/app';
 
 type Props = {
   goal: Goal;
@@ -16,7 +16,10 @@ type Props = {
   onSelectMeal: (meal: MealOption) => void;
   onOpenHistory: () => void;
   onOpenCheckIn: () => void;
+  onAdjustRecommendation: (mode: AdjustmentMode) => void;
 };
+
+const adjustmentModes: AdjustmentMode[] = ['더 가볍게', '더 든든하게', '더 저렴하게', '외식 중심'];
 
 export function HomeScreen({
   goal,
@@ -29,6 +32,7 @@ export function HomeScreen({
   onSelectMeal,
   onOpenHistory,
   onOpenCheckIn,
+  onAdjustRecommendation,
 }: Props) {
   const latest = recentLogs[0];
 
@@ -63,6 +67,13 @@ export function HomeScreen({
         <Text style={styles.cardDescription}>
           {checkIn.place} · {checkIn.hunger} · {checkIn.budget} · {checkIn.craving} 기준으로 추천을 조정했습니다.
         </Text>
+        <View style={styles.adjustmentWrap}>
+          {adjustmentModes.map((mode) => (
+            <View key={mode} style={styles.adjustmentButton}>
+              <AppButton label={mode} onPress={() => onAdjustRecommendation(mode)} variant="secondary" />
+            </View>
+          ))}
+        </View>
         {mealOptions.map((meal, index) => (
           <View key={meal.title} style={[styles.mealRow, index !== mealOptions.length - 1 && styles.rowBorder]}>
             <View style={styles.mealMain}>
@@ -121,6 +132,8 @@ const styles = StyleSheet.create({
   contextChip: { backgroundColor: colors.white, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
   contextChipText: { color: colors.greenStrong, fontSize: 13, fontWeight: '700' },
   actionGap: { marginBottom: 10 },
+  adjustmentWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
+  adjustmentButton: { minWidth: '47%' },
   mealRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
   rowBorder: { borderBottomWidth: 1, borderBottomColor: '#EEF1EA' },
   mealMain: { flex: 1, paddingRight: 12 },

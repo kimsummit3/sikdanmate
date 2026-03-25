@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createMealLog, getMealOptions, getWeeklyStats } from '../data/options';
 import { loadAppState, saveAppState } from '../storage/appStorage';
 import {
+  AdjustmentMode,
   BudgetLevel,
   CheckInPlace,
   CheckInState,
@@ -35,6 +36,7 @@ const initialCheckIn: CheckInState = {
   hunger: '보통',
   budget: '보통',
   craving: '한식',
+  adjustmentMode: '기본',
 };
 
 export function useProfileState() {
@@ -82,10 +84,11 @@ export function useProfileState() {
   };
 
   const updateCheckIn = {
-    setPlace: (place: CheckInPlace) => setCheckIn((prev) => ({ ...prev, place })),
-    setHunger: (hunger: HungerLevel) => setCheckIn((prev) => ({ ...prev, hunger })),
-    setBudget: (budget: BudgetLevel) => setCheckIn((prev) => ({ ...prev, budget })),
-    setCraving: (craving: string) => setCheckIn((prev) => ({ ...prev, craving })),
+    setPlace: (place: CheckInPlace) => setCheckIn((prev) => ({ ...prev, place, adjustmentMode: '기본' })),
+    setHunger: (hunger: HungerLevel) => setCheckIn((prev) => ({ ...prev, hunger, adjustmentMode: '기본' })),
+    setBudget: (budget: BudgetLevel) => setCheckIn((prev) => ({ ...prev, budget, adjustmentMode: '기본' })),
+    setCraving: (craving: string) => setCheckIn((prev) => ({ ...prev, craving, adjustmentMode: '기본' })),
+    setAdjustmentMode: (adjustmentMode: AdjustmentMode) => setCheckIn((prev) => ({ ...prev, adjustmentMode })),
   };
 
   return {
