@@ -3,6 +3,7 @@ import { MealOption } from './app';
 export type RootStackParamList = {
   Onboarding: undefined;
   MainTabs: undefined;
+  CheckIn: undefined;
   Log: { meal: MealOption };
   History: undefined;
 };

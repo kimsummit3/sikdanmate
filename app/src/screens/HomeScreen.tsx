@@ -14,6 +14,7 @@ type Props = {
   onOpenSettings: () => void;
   onSelectMeal: (meal: MealOption) => void;
   onOpenHistory: () => void;
+  onOpenCheckIn: () => void;
 };
 
 export function HomeScreen({
@@ -25,6 +26,7 @@ export function HomeScreen({
   onOpenSettings,
   onSelectMeal,
   onOpenHistory,
+  onOpenCheckIn,
 }: Props) {
   const latest = recentLogs[0];
 
@@ -50,9 +52,9 @@ export function HomeScreen({
           ))}
         </View>
         <View style={styles.actionGap}>
-          <AppButton label="음성으로 체크인 시작" onPress={() => onSelectMeal(mealOptions[0])} />
+          <AppButton label="음성으로 체크인 시작" onPress={onOpenCheckIn} />
         </View>
-        <AppButton label="텍스트로 빠르게 시작" onPress={() => onSelectMeal(mealOptions[0])} variant="secondary" />
+        <AppButton label="텍스트로 빠르게 시작" onPress={onOpenCheckIn} variant="secondary" />
       </SurfaceCard>
 
       <SurfaceCard style={styles.spacedCard}>

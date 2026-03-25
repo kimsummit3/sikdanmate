@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { BottomTabBar } from '../components/BottomTabBar';
 import { useProfileState } from '../hooks/useProfileState';
+import { CheckInScreen } from '../screens/CheckInScreen';
 import { HistoryScreen } from '../screens/HistoryScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LogScreen } from '../screens/LogScreen';
@@ -29,6 +30,7 @@ function MainTabs({
   onOpenSettings,
   onSelectMeal,
   onOpenHistory,
+  onOpenCheckIn,
   onSelectGoal,
   onSelectStyle,
   onToggleConstraint,
@@ -46,6 +48,7 @@ function MainTabs({
   onOpenSettings: () => void;
   onSelectMeal: (meal: MealOption) => void;
   onOpenHistory: () => void;
+  onOpenCheckIn: () => void;
   onSelectGoal: (goal: any) => void;
   onSelectStyle: (style: any) => void;
   onToggleConstraint: (constraint: any) => void;
@@ -64,6 +67,7 @@ function MainTabs({
             onOpenSettings={onOpenSettings}
             onSelectMeal={onSelectMeal}
             onOpenHistory={onOpenHistory}
+            onOpenCheckIn={onOpenCheckIn}
           />
         )}
         {currentTab === 'summary' && (
@@ -104,7 +108,7 @@ function SplashScreen() {
 export function AppNavigator() {
   const [currentTab, setCurrentTab] = useState<MainTabKey>('home');
   const [selectedMeal, setSelectedMeal] = useState<MealOption | null>(null);
-  const { goal, eatingStyle, constraints, selectedResult, mealOptions, weeklyStats, mealLogs, hydrated, actions } = useProfileState();
+  const { goal, eatingStyle, constraints, selectedResult, mealOptions, weeklyStats, mealLogs, hydrated, checkIn, actions } = useProfileState();
 
   if (!hydrated) {
     return <SplashScreen />;
@@ -145,10 +149,27 @@ export function AppNavigator() {
                 navigation.navigate('Log', { meal });
               }}
               onOpenHistory={() => navigation.navigate('History')}
+              onOpenCheckIn={() => navigation.navigate('CheckIn')}
               onSelectGoal={actions.setGoal}
               onSelectStyle={actions.setEatingStyle}
               onToggleConstraint={actions.toggleConstraint}
               onBackHome={() => setCurrentTab('home')}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="CheckIn">
+          {({ navigation }) => (
+            <CheckInScreen
+              checkIn={checkIn}
+              onSelectPlace={actions.setPlace}
+              onSelectHunger={actions.setHunger}
+              onSelectBudget={actions.setBudget}
+              onSetCravingPreset={actions.setCraving}
+              onContinue={() => {
+                setSelectedMeal(mealOptions[0]);
+                navigation.navigate('Log', { meal: mealOptions[0] });
+              }}
+              onBack={() => navigation.goBack()}
             />
           )}
         </Stack.Screen>
@@ -174,12 +195,7 @@ export function AppNavigator() {
           )}
         </Stack.Screen>
         <Stack.Screen name="History">
-          {({ navigation }) => (
-            <HistoryScreen
-              mealLogs={mealLogs}
-              onBack={() => navigation.goBack()}
-            />
-          )}
+          {({ navigation }) => <HistoryScreen mealLogs={mealLogs} onBack={() => navigation.goBack()} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

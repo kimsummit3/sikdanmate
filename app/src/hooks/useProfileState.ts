@@ -1,7 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createMealLog, getMealOptions, getWeeklyStats } from '../data/options';
 import { loadAppState, saveAppState } from '../storage/appStorage';
-import { Constraint, EatingStyle, Goal, LogResult, MealLog, MealOption, UserProfile } from '../types/app';
+import {
+  BudgetLevel,
+  CheckInPlace,
+  CheckInState,
+  Constraint,
+  EatingStyle,
+  Goal,
+  HungerLevel,
+  LogResult,
+  MealLog,
+  MealOption,
+  UserProfile,
+} from '../types/app';
 
 const initialLogs: MealLog[] = [
   {
@@ -18,6 +30,13 @@ const initialLogs: MealLog[] = [
   },
 ];
 
+const initialCheckIn: CheckInState = {
+  place: '밖',
+  hunger: '보통',
+  budget: '보통',
+  craving: '한식',
+};
+
 export function useProfileState() {
   const [goal, setGoal] = useState<Goal>('감량');
   const [eatingStyle, setEatingStyle] = useState<EatingStyle>('외식 많음');
@@ -25,6 +44,7 @@ export function useProfileState() {
   const [selectedResult, setSelectedResult] = useState<LogResult | null>(null);
   const [mealLogs, setMealLogs] = useState<MealLog[]>(initialLogs);
   const [hydrated, setHydrated] = useState(false);
+  const [checkIn, setCheckIn] = useState<CheckInState>(initialCheckIn);
 
   useEffect(() => {
     (async () => {
@@ -41,12 +61,7 @@ export function useProfileState() {
 
   useEffect(() => {
     if (!hydrated) return;
-    void saveAppState({
-      goal,
-      eatingStyle,
-      constraints,
-      mealLogs,
-    });
+    void saveAppState({ goal, eatingStyle, constraints, mealLogs });
   }, [goal, eatingStyle, constraints, mealLogs, hydrated]);
 
   const profile: UserProfile = { goal, eatingStyle, constraints };
@@ -66,6 +81,13 @@ export function useProfileState() {
     return true;
   };
 
+  const updateCheckIn = {
+    setPlace: (place: CheckInPlace) => setCheckIn((prev) => ({ ...prev, place })),
+    setHunger: (hunger: HungerLevel) => setCheckIn((prev) => ({ ...prev, hunger })),
+    setBudget: (budget: BudgetLevel) => setCheckIn((prev) => ({ ...prev, budget })),
+    setCraving: (craving: string) => setCheckIn((prev) => ({ ...prev, craving })),
+  };
+
   return {
     profile,
     goal,
@@ -76,12 +98,14 @@ export function useProfileState() {
     weeklyStats,
     mealLogs,
     hydrated,
+    checkIn,
     actions: {
       setGoal,
       setEatingStyle,
       toggleConstraint,
       setSelectedResult,
       saveMealLog: saveMealLogEntry,
+      ...updateCheckIn,
     },
   };
 }
