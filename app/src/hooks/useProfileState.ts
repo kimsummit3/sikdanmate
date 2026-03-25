@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { createMealLog, generateWeeklyPlan, getMealOptions, getWeeklyStats } from '../data/options';
+import { createMealLog, generateShoppingList, generateWeeklyPlan, getMealOptions, getWeeklyStats } from '../data/options';
 import { loadAppState, saveAppState } from '../storage/appStorage';
 import {
   AdjustmentMode,
@@ -72,6 +72,7 @@ export function useProfileState() {
   const profile: UserProfile = { goal, eatingStyle, constraints };
   const mealOptions = useMemo(() => getMealOptions(eatingStyle, checkIn), [eatingStyle, checkIn]);
   const weeklyStats = useMemo(() => getWeeklyStats(profile, mealLogs), [profile, mealLogs]);
+  const shoppingItems = useMemo(() => generateShoppingList(weeklyPlan), [weeklyPlan]);
 
   const toggleConstraint = (item: Constraint) => {
     setConstraints((prev) => (prev.includes(item) ? prev.filter((value) => value !== item) : [...prev, item]));
@@ -118,6 +119,7 @@ export function useProfileState() {
     hydrated,
     checkIn,
     weeklyPlan,
+    shoppingItems,
     actions: {
       setGoal,
       setEatingStyle,

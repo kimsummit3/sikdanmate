@@ -6,6 +6,7 @@ import {
   LogResult,
   MealLog,
   MealOption,
+  ShoppingItem,
   UserProfile,
   WeeklyPlanItem,
   WeeklyStats,
@@ -85,12 +86,27 @@ export function getMealOptions(eatingStyle: EatingStyle, checkIn?: CheckInState)
 export function generateWeeklyPlan(eatingStyle: EatingStyle, checkIn?: CheckInState): WeeklyPlanItem[] {
   const baseMeals = getMealOptions(eatingStyle, checkIn);
   const days = ['월', '화', '수', '목', '금', '토', '일'];
-  return days.map((day, index) => ({
-    day,
-    mealTitle: baseMeals[index % baseMeals.length].title,
-    note: index < 5 ? '기본 추천 루틴' : '주말 변주/외식 대응',
-    fixed: false,
-  }));
+  return days.map((day, index) => ({ day, mealTitle: baseMeals[index % baseMeals.length].title, note: index < 5 ? '기본 추천 루틴' : '주말 변주/외식 대응', fixed: false }));
+}
+
+export function generateShoppingList(plan: WeeklyPlanItem[]): ShoppingItem[] {
+  const joined = plan.map((item) => item.mealTitle).join(' ');
+  const list: ShoppingItem[] = [];
+  const push = (item: ShoppingItem) => list.push(item);
+
+  if (joined.includes('닭가슴살')) push({ id: 'protein-1', category: '단백질', name: '닭가슴살', quantity: '5팩', substitute: '두부/계란', storageTip: '냉장 2일, 나머지는 냉동' });
+  if (joined.includes('두부')) push({ id: 'protein-2', category: '단백질', name: '두부', quantity: '3모', substitute: '연두부', storageTip: '냉장 보관, 개봉 후 빠르게 사용' });
+  if (joined.includes('계란')) push({ id: 'protein-3', category: '단백질', name: '계란', quantity: '10구', substitute: '삶은계란팩', storageTip: '냉장 보관' });
+  if (joined.includes('샐러드')) push({ id: 'veg-1', category: '채소', name: '샐러드 채소 믹스', quantity: '3봉', substitute: '양배추/상추', storageTip: '2~3일 단위 리필 추천' });
+  if (joined.includes('바나나')) push({ id: 'etc-1', category: '기타', name: '바나나', quantity: '1송이', substitute: '사과', storageTip: '실온 후숙' });
+  if (joined.includes('현미')) push({ id: 'carb-1', category: '탄수화물', name: '현미밥/현미', quantity: '7공기 분량', substitute: '잡곡밥', storageTip: '소분 냉동 가능' });
+  if (joined.includes('김밥') || joined.includes('밥')) push({ id: 'carb-2', category: '탄수화물', name: '쌀/즉석밥', quantity: '5~7식 분량', substitute: '고구마', storageTip: '주간 단위 보충' });
+
+  if (list.length === 0) {
+    push({ id: 'fallback-1', category: '기타', name: '기본 장보기 묶음', quantity: '1세트', substitute: '주간 계획 재생성', storageTip: '계획에 맞춰 품목 보정' });
+  }
+
+  return list;
 }
 
 export function getWeeklyStats(profile: UserProfile, logs: MealLog[]): WeeklyStats {

@@ -11,6 +11,7 @@ import { LogScreen } from '../screens/LogScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { PlannerScreen } from '../screens/PlannerScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+import { ShoppingScreen } from '../screens/ShoppingScreen';
 import { SummaryScreen } from '../screens/SummaryScreen';
 import { colors } from '../styles/theme';
 import { MealOption } from '../types/app';
@@ -58,7 +59,7 @@ function SplashScreen() {
 export function AppNavigator() {
   const [currentTab, setCurrentTab] = useState<MainTabKey>('home');
   const [selectedMeal, setSelectedMeal] = useState<MealOption | null>(null);
-  const { goal, eatingStyle, constraints, selectedResult, mealOptions, weeklyStats, mealLogs, hydrated, checkIn, weeklyPlan, actions } = useProfileState();
+  const { goal, eatingStyle, constraints, selectedResult, mealOptions, weeklyStats, mealLogs, hydrated, checkIn, weeklyPlan, shoppingItems, actions } = useProfileState();
 
   if (!hydrated) return <SplashScreen />;
 
@@ -102,7 +103,10 @@ export function AppNavigator() {
           {({ navigation }) => <CheckInScreen checkIn={checkIn} onSelectPlace={actions.setPlace} onSelectHunger={actions.setHunger} onSelectBudget={actions.setBudget} onSetCravingPreset={actions.setCraving} onContinue={() => { setSelectedMeal(mealOptions[0]); navigation.navigate('Log', { meal: mealOptions[0] }); }} onBack={() => navigation.goBack()} />}
         </Stack.Screen>
         <Stack.Screen name="Planner">
-          {({ navigation }) => <PlannerScreen weeklyPlan={weeklyPlan} onBack={() => navigation.goBack()} onRegenerate={actions.regenerateWeeklyPlan} onToggleFixed={actions.toggleWeeklyPlanFixed} />}
+          {({ navigation }) => <PlannerScreen weeklyPlan={weeklyPlan} onBack={() => navigation.goBack()} onRegenerate={actions.regenerateWeeklyPlan} onToggleFixed={actions.toggleWeeklyPlanFixed} onOpenShopping={() => navigation.navigate('Shopping')} />}
+        </Stack.Screen>
+        <Stack.Screen name="Shopping">
+          {({ navigation }) => <ShoppingScreen shoppingItems={shoppingItems} onBack={() => navigation.goBack()} />}
         </Stack.Screen>
         <Stack.Screen name="Log">
           {({ navigation, route }) => <LogScreen selectedMeal={route.params?.meal ?? selectedMeal} selectedResult={selectedResult} onSelectResult={actions.setSelectedResult} onBack={() => navigation.goBack()} onComplete={() => { const saved = actions.saveMealLog(route.params?.meal ?? selectedMeal, selectedResult); if (saved) navigation.goBack(); }} onOpenSummary={() => { const saved = actions.saveMealLog(route.params?.meal ?? selectedMeal, selectedResult); if (saved) { setCurrentTab('summary'); navigation.replace('MainTabs'); } }} />}

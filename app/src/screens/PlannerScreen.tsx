@@ -10,9 +10,10 @@ type Props = {
   onBack: () => void;
   onRegenerate: () => void;
   onToggleFixed: (day: string) => void;
+  onOpenShopping: () => void;
 };
 
-export function PlannerScreen({ weeklyPlan, onBack, onRegenerate, onToggleFixed }: Props) {
+export function PlannerScreen({ weeklyPlan, onBack, onRegenerate, onToggleFixed, onOpenShopping }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <AppHeader
@@ -27,6 +28,9 @@ export function PlannerScreen({ weeklyPlan, onBack, onRegenerate, onToggleFixed 
         <Text style={styles.cardLabel}>플래너 원칙</Text>
         <Text style={styles.heroTitle}>완벽한 한 달보다, 유지 가능한 한 주가 먼저입니다.</Text>
         <Text style={styles.heroDescription}>고정/교체/재생성을 통해 주간 루틴을 다듬고, 이후 4주 플래너로 확장합니다.</Text>
+        <View style={styles.shoppingButtonWrap}>
+          <AppButton label="장보기 리스트 보기" onPress={onOpenShopping} />
+        </View>
       </SurfaceCard>
 
       {weeklyPlan.map((item) => (
@@ -38,12 +42,8 @@ export function PlannerScreen({ weeklyPlan, onBack, onRegenerate, onToggleFixed 
           <Text style={styles.mealTitle}>{item.mealTitle}</Text>
           <Text style={styles.note}>{item.note}</Text>
           <View style={styles.buttonRow}>
-            <View style={styles.buttonHalf}>
-              <AppButton label={item.fixed ? '고정 해제' : '고정'} onPress={() => onToggleFixed(item.day)} variant="secondary" />
-            </View>
-            <View style={styles.buttonHalf}>
-              <AppButton label="다시 생성" onPress={onRegenerate} />
-            </View>
+            <View style={styles.buttonHalf}><AppButton label={item.fixed ? '고정 해제' : '고정'} onPress={() => onToggleFixed(item.day)} variant="secondary" /></View>
+            <View style={styles.buttonHalf}><AppButton label="다시 생성" onPress={onRegenerate} /></View>
           </View>
         </SurfaceCard>
       ))}
@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
   cardLabel: { fontSize: 12, fontWeight: '700', color: colors.greenDeep, marginBottom: 10 },
   heroTitle: { fontSize: 22, fontWeight: '800', color: colors.text, lineHeight: 30, marginBottom: 8 },
   heroDescription: { fontSize: 15, lineHeight: 22, color: colors.textMuted },
+  shoppingButtonWrap: { marginTop: 14 },
   rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   day: { fontSize: 18, fontWeight: '700', color: colors.text },
   fixed: { fontSize: 13, fontWeight: '700', color: colors.greenStrong },
