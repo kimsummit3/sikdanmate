@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { createMealLog, getMealOptions, getWeeklyStats } from '../data/options';
+import { createMealLog, generateWeeklyPlan, getMealOptions, getWeeklyStats } from '../data/options';
 import { loadAppState, saveAppState } from '../storage/appStorage';
 import {
   AdjustmentMode,
@@ -14,21 +14,12 @@ import {
   MealLog,
   MealOption,
   UserProfile,
+  WeeklyPlanItem,
 } from '../types/app';
 
 const initialLogs: MealLog[] = [
-  {
-    id: 'seed-1',
-    mealTitle: '닭가슴살 샐러드 + 현미김밥 1줄',
-    result: '잘 지켰어요',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
-  },
-  {
-    id: 'seed-2',
-    mealTitle: '순두부찌개 + 밥 2/3 공기',
-    result: '비슷해요',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-  },
+  { id: 'seed-1', mealTitle: '닭가슴살 샐러드 + 현미김밥 1줄', result: '잘 지켰어요', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString() },
+  { id: 'seed-2', mealTitle: '순두부찌개 + 밥 2/3 공기', result: '비슷해요', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() },
 ];
 
 const initialCheckIn: CheckInState = {
@@ -47,6 +38,7 @@ export function useProfileState() {
   const [mealLogs, setMealLogs] = useState<MealLog[]>(initialLogs);
   const [hydrated, setHydrated] = useState(false);
   const [checkIn, setCheckIn] = useState<CheckInState>(initialCheckIn);
+  const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlanItem[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -66,14 +58,23 @@ export function useProfileState() {
     void saveAppState({ goal, eatingStyle, constraints, mealLogs });
   }, [goal, eatingStyle, constraints, mealLogs, hydrated]);
 
+  useEffect(() => {
+    setWeeklyPlan((prev) => {
+      const regenerated = generateWeeklyPlan(eatingStyle, checkIn);
+      if (prev.length === 0) return regenerated;
+      return regenerated.map((item) => {
+        const found = prev.find((p) => p.day === item.day && p.fixed);
+        return found ?? item;
+      });
+    });
+  }, [eatingStyle, checkIn]);
+
   const profile: UserProfile = { goal, eatingStyle, constraints };
   const mealOptions = useMemo(() => getMealOptions(eatingStyle, checkIn), [eatingStyle, checkIn]);
   const weeklyStats = useMemo(() => getWeeklyStats(profile, mealLogs), [profile, mealLogs]);
 
   const toggleConstraint = (item: Constraint) => {
-    setConstraints((prev) =>
-      prev.includes(item) ? prev.filter((value) => value !== item) : [...prev, item]
-    );
+    setConstraints((prev) => (prev.includes(item) ? prev.filter((value) => value !== item) : [...prev, item]));
   };
 
   const saveMealLogEntry = (meal: MealOption | null, result: LogResult | null) => {
@@ -91,6 +92,20 @@ export function useProfileState() {
     setAdjustmentMode: (adjustmentMode: AdjustmentMode) => setCheckIn((prev) => ({ ...prev, adjustmentMode })),
   };
 
+  const regenerateWeeklyPlan = () => {
+    setWeeklyPlan((prev) => {
+      const regenerated = generateWeeklyPlan(eatingStyle, checkIn);
+      return regenerated.map((item) => {
+        const found = prev.find((p) => p.day === item.day && p.fixed);
+        return found ?? item;
+      });
+    });
+  };
+
+  const toggleWeeklyPlanFixed = (day: string) => {
+    setWeeklyPlan((prev) => prev.map((item) => (item.day === day ? { ...item, fixed: !item.fixed } : item)));
+  };
+
   return {
     profile,
     goal,
@@ -102,12 +117,15 @@ export function useProfileState() {
     mealLogs,
     hydrated,
     checkIn,
+    weeklyPlan,
     actions: {
       setGoal,
       setEatingStyle,
       toggleConstraint,
       setSelectedResult,
       saveMealLog: saveMealLogEntry,
+      regenerateWeeklyPlan,
+      toggleWeeklyPlanFixed,
       ...updateCheckIn,
     },
   };

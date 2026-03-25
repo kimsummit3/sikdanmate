@@ -4,6 +4,7 @@ export type RootStackParamList = {
   Onboarding: undefined;
   MainTabs: undefined;
   CheckIn: undefined;
+  Planner: undefined;
   Log: { meal: MealOption };
   History: undefined;
 };
