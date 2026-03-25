@@ -1,9 +1,9 @@
 import { PropsWithChildren } from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { colors } from '../styles/theme';
 
 type Props = PropsWithChildren<{
-  style?: ViewStyle | ViewStyle[];
+  style?: StyleProp<ViewStyle>;
   tone?: 'default' | 'soft';
 }>;
 

@@ -1,4 +1,7 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
+import { AppButton } from '../components/AppButton';
+import { AppHeader } from '../components/AppHeader';
+import { SurfaceCard } from '../components/SurfaceCard';
 import { colors } from '../styles/theme';
 import { LogResult, MealOption } from '../types/app';
 
@@ -20,43 +23,37 @@ const resultOptions: { label: LogResult; helper: string }[] = [
 export function LogScreen({ selectedMeal, selectedResult, onSelectResult, onBack, onComplete, onOpenSummary }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.eyebrow}>식사 기록</Text>
-          <Text style={styles.title}>이번 식사는{`\n`}어땠나요?</Text>
-          <Text style={styles.subtitle}>정확한 칼로리보다, 흐름이 이어졌는지 빠르게 체크하는 것이 먼저입니다.</Text>
-        </View>
-        <TouchableOpacity style={styles.badge} onPress={onBack}>
-          <Text style={styles.badgeText}>추천으로 돌아가기</Text>
-        </TouchableOpacity>
-      </View>
+      <AppHeader
+        eyebrow="식사 기록"
+        title={`이번 식사는\n어땠나요?`}
+        subtitle="정확한 칼로리보다, 흐름이 이어졌는지 빠르게 체크하는 것이 먼저입니다."
+        actionLabel="추천으로 돌아가기"
+        onPressAction={onBack}
+      />
 
-      <View style={styles.mealCard}>
+      <SurfaceCard style={styles.cardSpacing}>
         <Text style={styles.cardLabel}>선택한 식단</Text>
         <Text style={styles.mealTitle}>{selectedMeal?.title ?? '선택한 식단 없음'}</Text>
         <Text style={styles.mealDescription}>{selectedMeal?.description ?? '먼저 홈 화면에서 식단을 선택해 주세요.'}</Text>
-      </View>
+      </SurfaceCard>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>기록 상태 선택</Text>
-        <Text style={styles.sectionMeta}>1 tap</Text>
-      </View>
+      <Text style={styles.sectionTitle}>기록 상태 선택</Text>
 
       {resultOptions.map((option) => {
         const selected = selectedResult === option.label;
         return (
-          <TouchableOpacity
-            key={option.label}
-            style={[styles.resultCard, selected && styles.resultCardSelected]}
-            onPress={() => onSelectResult(option.label)}
-          >
-            <Text style={[styles.resultTitle, selected && styles.resultTitleSelected]}>{option.label}</Text>
-            <Text style={[styles.resultHelper, selected && styles.resultHelperSelected]}>{option.helper}</Text>
-          </TouchableOpacity>
+          <SurfaceCard key={option.label} style={[styles.resultCard, selected ? styles.resultCardSelected : undefined]}>
+            <Text style={[styles.resultTitle, selected && styles.resultTitleSelected]} onPress={() => onSelectResult(option.label)}>
+              {option.label}
+            </Text>
+            <Text style={[styles.resultHelper, selected && styles.resultHelperSelected]} onPress={() => onSelectResult(option.label)}>
+              {option.helper}
+            </Text>
+          </SurfaceCard>
         );
       })}
 
-      <View style={styles.recoveryCard}>
+      <SurfaceCard tone="soft" style={styles.cardSpacing}>
         <Text style={styles.cardLabel}>다음 한 끼 복귀</Text>
         <Text style={styles.recoveryTitle}>
           {selectedResult === '벗어났어요'
@@ -66,23 +63,10 @@ export function LogScreen({ selectedMeal, selectedResult, onSelectResult, onBack
         <Text style={styles.recoveryDescription}>
           실패를 크게 분석하기보다, 다음 선택을 쉽게 만드는 것이 식단메이트의 기본 원칙입니다.
         </Text>
-      </View>
+      </SurfaceCard>
 
-      <TouchableOpacity
-        style={[styles.primaryButton, !selectedResult && styles.primaryButtonDisabled]}
-        disabled={!selectedResult}
-        onPress={onComplete}
-      >
-        <Text style={styles.primaryButtonText}>기록 완료하고 홈으로</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.secondaryCta, !selectedResult && styles.primaryButtonDisabled]}
-        disabled={!selectedResult}
-        onPress={onOpenSummary}
-      >
-        <Text style={styles.secondaryCtaText}>주간 요약 보기</Text>
-      </TouchableOpacity>
+      <AppButton label="기록 완료하고 홈으로" onPress={onComplete} disabled={!selectedResult} />
+      <AppButton label="주간 요약 보기" onPress={onOpenSummary} disabled={!selectedResult} variant="secondary" />
     </ScrollView>
   );
 }
@@ -92,52 +76,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 32,
+    gap: 10,
   },
-  header: {
-    gap: 14,
-    marginBottom: 24,
-  },
-  eyebrow: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    color: colors.greenDeep,
+  cardSpacing: {
     marginBottom: 8,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: 8,
-    lineHeight: 40,
-  },
-  subtitle: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: colors.textMuted,
-    maxWidth: 320,
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: colors.greenLight,
-  },
-  badgeText: {
-    color: '#335339',
-    fontWeight: '700',
-  },
-  mealCard: {
-    backgroundColor: colors.white,
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: colors.greenDeep,
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 2,
   },
   cardLabel: {
     fontSize: 12,
@@ -157,26 +99,15 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: colors.textMuted,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
   sectionTitle: {
     fontSize: 22,
     fontWeight: '700',
     color: colors.text,
-  },
-  sectionMeta: {
-    color: colors.textSoft,
-    fontWeight: '600',
+    marginTop: 4,
+    marginBottom: 2,
   },
   resultCard: {
-    backgroundColor: colors.white,
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 12,
+    marginBottom: 2,
     borderWidth: 1,
     borderColor: 'transparent',
   },
@@ -201,13 +132,6 @@ const styles = StyleSheet.create({
   resultHelperSelected: {
     color: '#35523A',
   },
-  recoveryCard: {
-    backgroundColor: colors.greenSurface,
-    borderRadius: 24,
-    padding: 20,
-    marginTop: 12,
-    marginBottom: 18,
-  },
   recoveryTitle: {
     fontSize: 22,
     fontWeight: '800',
@@ -219,31 +143,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     color: '#4E6151',
-  },
-  primaryButton: {
-    backgroundColor: colors.greenButton,
-    borderRadius: 16,
-    paddingVertical: 15,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  primaryButtonDisabled: {
-    opacity: 0.45,
-  },
-  primaryButtonText: {
-    color: '#17301B',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  secondaryCta: {
-    borderRadius: 16,
-    paddingVertical: 15,
-    alignItems: 'center',
-    backgroundColor: colors.white,
-  },
-  secondaryCtaText: {
-    color: colors.greenStrong,
-    fontSize: 16,
-    fontWeight: '700',
   },
 });

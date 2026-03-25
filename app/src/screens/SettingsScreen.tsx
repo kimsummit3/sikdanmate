@@ -1,5 +1,8 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppButton } from '../components/AppButton';
+import { AppHeader } from '../components/AppHeader';
 import { SelectableChip } from '../components/SelectableChip';
+import { SurfaceCard } from '../components/SurfaceCard';
 import { constraintOptions, goalOptions, styleOptions } from '../data/options';
 import { colors } from '../styles/theme';
 import { Constraint, EatingStyle, Goal } from '../types/app';
@@ -25,13 +28,13 @@ export function SettingsScreen({
 }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>설정</Text>
-        <Text style={styles.title}>내 식단 기준을{`\n`}조정합니다.</Text>
-        <Text style={styles.subtitle}>앱 전체 추천은 여기서 바꾼 기준을 따라갑니다.</Text>
-      </View>
+      <AppHeader
+        eyebrow="설정"
+        title={`내 식단 기준을\n조정합니다.`}
+        subtitle="앱 전체 추천은 여기서 바꾼 기준을 따라갑니다."
+      />
 
-      <View style={styles.card}>
+      <SurfaceCard style={styles.cardSpacing}>
         <Text style={styles.cardLabel}>목표</Text>
         <View style={styles.optionGrid}>
           {goalOptions.map((item) => (
@@ -43,9 +46,9 @@ export function SettingsScreen({
             />
           ))}
         </View>
-      </View>
+      </SurfaceCard>
 
-      <View style={styles.card}>
+      <SurfaceCard style={styles.cardSpacing}>
         <Text style={styles.cardLabel}>식단 스타일</Text>
         <View style={styles.optionGrid}>
           {styleOptions.map((item) => (
@@ -57,9 +60,9 @@ export function SettingsScreen({
             />
           ))}
         </View>
-      </View>
+      </SurfaceCard>
 
-      <View style={styles.card}>
+      <SurfaceCard style={styles.cardSpacing}>
         <Text style={styles.cardLabel}>현실 조건</Text>
         <View style={styles.optionGrid}>
           {constraintOptions.map((item) => (
@@ -71,11 +74,9 @@ export function SettingsScreen({
             />
           ))}
         </View>
-      </View>
+      </SurfaceCard>
 
-      <TouchableOpacity style={styles.primaryButton} onPress={onBackHome}>
-        <Text style={styles.primaryButtonText}>설정 저장하고 돌아가기</Text>
-      </TouchableOpacity>
+      <AppButton label="설정 저장하고 돌아가기" onPress={onBackHome} />
     </ScrollView>
   );
 }
@@ -86,39 +87,8 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 32,
   },
-  header: {
-    marginBottom: 24,
-  },
-  eyebrow: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    color: colors.greenDeep,
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: 8,
-    lineHeight: 40,
-  },
-  subtitle: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: colors.textMuted,
-    maxWidth: 320,
-  },
-  card: {
-    backgroundColor: colors.white,
-    borderRadius: 24,
-    padding: 20,
+  cardSpacing: {
     marginBottom: 16,
-    shadowColor: colors.greenDeep,
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 2,
   },
   cardLabel: {
     fontSize: 12,
@@ -130,17 +100,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-  },
-  primaryButton: {
-    backgroundColor: colors.greenButton,
-    borderRadius: 16,
-    paddingVertical: 15,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  primaryButtonText: {
-    color: '#17301B',
-    fontSize: 16,
-    fontWeight: '700',
   },
 });
