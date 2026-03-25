@@ -1,39 +1,26 @@
 import { StatusBar } from 'expo-status-bar';
-import { useMemo, useState } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { BottomTabBar } from './src/components/BottomTabBar';
-import { getMealOptions, getWeeklyStats } from './src/data/options';
+import { useAppState } from './src/hooks/useAppState';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { LogScreen } from './src/screens/LogScreen';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 import { SummaryScreen } from './src/screens/SummaryScreen';
 import { colors } from './src/styles/theme';
-import { Constraint, EatingStyle, Goal, LogResult, MealOption, Screen, UserProfile } from './src/types/app';
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('onboarding');
-  const [goal, setGoal] = useState<Goal>('감량');
-  const [eatingStyle, setEatingStyle] = useState<EatingStyle>('외식 많음');
-  const [constraints, setConstraints] = useState<Constraint[]>(['편의점 가능', '예산 민감']);
-  const [selectedMeal, setSelectedMeal] = useState<MealOption | null>(null);
-  const [selectedResult, setSelectedResult] = useState<LogResult | null>(null);
-
-  const profile: UserProfile = { goal, eatingStyle, constraints };
-  const mealOptions = useMemo(() => getMealOptions(eatingStyle), [eatingStyle]);
-  const weeklyStats = useMemo(() => getWeeklyStats(profile, selectedResult), [profile, selectedResult]);
-
-  const toggleConstraint = (item: Constraint) => {
-    setConstraints((prev) =>
-      prev.includes(item) ? prev.filter((value) => value !== item) : [...prev, item]
-    );
-  };
-
-  const handleSelectMeal = (meal: MealOption) => {
-    setSelectedMeal(meal);
-    setSelectedResult(null);
-    setScreen('log');
-  };
+  const { state, actions } = useAppState();
+  const {
+    screen,
+    goal,
+    eatingStyle,
+    constraints,
+    selectedMeal,
+    selectedResult,
+    mealOptions,
+    weeklyStats,
+  } = state;
 
   const showTabs = screen !== 'onboarding' && screen !== 'log';
 
@@ -46,10 +33,10 @@ export default function App() {
             goal={goal}
             eatingStyle={eatingStyle}
             constraints={constraints}
-            onSelectGoal={setGoal}
-            onSelectStyle={setEatingStyle}
-            onToggleConstraint={toggleConstraint}
-            onContinue={() => setScreen('home')}
+            onSelectGoal={actions.setGoal}
+            onSelectStyle={actions.setEatingStyle}
+            onToggleConstraint={actions.toggleConstraint}
+            onContinue={actions.completeOnboarding}
           />
         )}
 
@@ -59,8 +46,8 @@ export default function App() {
             eatingStyle={eatingStyle}
             constraints={constraints}
             mealOptions={mealOptions}
-            onOpenSettings={() => setScreen('settings')}
-            onSelectMeal={handleSelectMeal}
+            onOpenSettings={actions.openSettings}
+            onSelectMeal={actions.selectMeal}
           />
         )}
 
@@ -68,10 +55,10 @@ export default function App() {
           <LogScreen
             selectedMeal={selectedMeal}
             selectedResult={selectedResult}
-            onSelectResult={setSelectedResult}
-            onBack={() => setScreen('home')}
-            onComplete={() => setScreen('home')}
-            onOpenSummary={() => setScreen('summary')}
+            onSelectResult={actions.setSelectedResult}
+            onBack={actions.goHome}
+            onComplete={actions.goHome}
+            onOpenSummary={actions.goSummary}
           />
         )}
 
@@ -80,7 +67,7 @@ export default function App() {
             goal={goal}
             lastResult={selectedResult}
             weeklyStats={weeklyStats}
-            onBackHome={() => setScreen('home')}
+            onBackHome={actions.goHome}
           />
         )}
 
@@ -89,10 +76,10 @@ export default function App() {
             goal={goal}
             eatingStyle={eatingStyle}
             constraints={constraints}
-            onSelectGoal={setGoal}
-            onSelectStyle={setEatingStyle}
-            onToggleConstraint={toggleConstraint}
-            onBackHome={() => setScreen('home')}
+            onSelectGoal={actions.setGoal}
+            onSelectStyle={actions.setEatingStyle}
+            onToggleConstraint={actions.toggleConstraint}
+            onBackHome={actions.goHome}
           />
         )}
       </View>
@@ -101,9 +88,9 @@ export default function App() {
         <BottomTabBar
           currentTab={screen === 'settings' ? 'settings' : screen === 'summary' ? 'summary' : 'home'}
           onChangeTab={(tab) => {
-            if (tab === 'home') setScreen('home');
-            if (tab === 'summary') setScreen('summary');
-            if (tab === 'settings') setScreen('settings');
+            if (tab === 'home') actions.goHome();
+            if (tab === 'summary') actions.goSummary();
+            if (tab === 'settings') actions.openSettings();
           }}
         />
       )}
