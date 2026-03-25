@@ -5,6 +5,7 @@ import { ActivityIndicator, Text, View } from 'react-native';
 import { BottomTabBar } from '../components/BottomTabBar';
 import { useProfileState } from '../hooks/useProfileState';
 import { CheckInScreen } from '../screens/CheckInScreen';
+import { CookingScreen } from '../screens/CookingScreen';
 import { HistoryScreen } from '../screens/HistoryScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LogScreen } from '../screens/LogScreen';
@@ -19,7 +20,7 @@ import { MainTabKey, RootStackParamList } from '../types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function MainTabs({ currentTab, onChangeTab, goal, eatingStyle, constraints, mealOptions, mealLogs, checkIn, weeklyStats, selectedResult, onOpenSettings, onSelectMeal, onOpenHistory, onOpenCheckIn, onOpenPlanner, onAdjustRecommendation, onSelectGoal, onSelectStyle, onToggleConstraint, onBackHome }: any) {
+function MainTabs({ currentTab, onChangeTab, goal, eatingStyle, constraints, mealOptions, mealLogs, checkIn, weeklyStats, selectedResult, onOpenSettings, onSelectMeal, onOpenHistory, onOpenCheckIn, onOpenPlanner, onOpenCooking, onAdjustRecommendation, onSelectGoal, onSelectStyle, onToggleConstraint, onBackHome }: any) {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
@@ -36,6 +37,7 @@ function MainTabs({ currentTab, onChangeTab, goal, eatingStyle, constraints, mea
             onOpenHistory={onOpenHistory}
             onOpenCheckIn={onOpenCheckIn}
             onOpenPlanner={onOpenPlanner}
+            onOpenCooking={onOpenCooking}
             onAdjustRecommendation={onAdjustRecommendation}
           />
         )}
@@ -59,7 +61,7 @@ function SplashScreen() {
 export function AppNavigator() {
   const [currentTab, setCurrentTab] = useState<MainTabKey>('home');
   const [selectedMeal, setSelectedMeal] = useState<MealOption | null>(null);
-  const { goal, eatingStyle, constraints, selectedResult, mealOptions, weeklyStats, mealLogs, hydrated, checkIn, weeklyPlan, shoppingItems, actions } = useProfileState();
+  const { goal, eatingStyle, constraints, selectedResult, mealOptions, weeklyStats, mealLogs, hydrated, checkIn, weeklyPlan, shoppingItems, getCookingState, actions } = useProfileState();
 
   if (!hydrated) return <SplashScreen />;
 
@@ -91,6 +93,10 @@ export function AppNavigator() {
               onOpenHistory={() => navigation.navigate('History')}
               onOpenCheckIn={() => navigation.navigate('CheckIn')}
               onOpenPlanner={() => navigation.navigate('Planner')}
+              onOpenCooking={() => {
+                actions.resetCookingStep();
+                navigation.navigate('Cooking', { mealTitle: mealOptions[0]?.title });
+              }}
               onAdjustRecommendation={actions.setAdjustmentMode}
               onSelectGoal={actions.setGoal}
               onSelectStyle={actions.setEatingStyle}
@@ -107,6 +113,13 @@ export function AppNavigator() {
         </Stack.Screen>
         <Stack.Screen name="Shopping">
           {({ navigation }) => <ShoppingScreen shoppingItems={shoppingItems} onBack={() => navigation.goBack()} />}
+        </Stack.Screen>
+        <Stack.Screen name="Cooking">
+          {({ navigation, route }) => {
+            const mealTitle = route.params?.mealTitle;
+            const cooking = getCookingState(mealTitle);
+            return <CookingScreen mealTitle={mealTitle} steps={cooking.steps} currentStep={cooking.currentCookingStep} onBack={() => navigation.goBack()} onPrev={actions.prevCookingStep} onNext={() => actions.nextCookingStep(mealTitle)} />;
+          }}
         </Stack.Screen>
         <Stack.Screen name="Log">
           {({ navigation, route }) => <LogScreen selectedMeal={route.params?.meal ?? selectedMeal} selectedResult={selectedResult} onSelectResult={actions.setSelectedResult} onBack={() => navigation.goBack()} onComplete={() => { const saved = actions.saveMealLog(route.params?.meal ?? selectedMeal, selectedResult); if (saved) navigation.goBack(); }} onOpenSummary={() => { const saved = actions.saveMealLog(route.params?.meal ?? selectedMeal, selectedResult); if (saved) { setCurrentTab('summary'); navigation.replace('MainTabs'); } }} />}

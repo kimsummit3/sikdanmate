@@ -17,12 +17,13 @@ type Props = {
   onOpenHistory: () => void;
   onOpenCheckIn: () => void;
   onOpenPlanner: () => void;
+  onOpenCooking: () => void;
   onAdjustRecommendation: (mode: AdjustmentMode) => void;
 };
 
 const adjustmentModes: AdjustmentMode[] = ['더 가볍게', '더 든든하게', '더 저렴하게', '외식 중심'];
 
-export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, recentLogs, checkIn, onOpenSettings, onSelectMeal, onOpenHistory, onOpenCheckIn, onOpenPlanner, onAdjustRecommendation }: Props) {
+export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, recentLogs, checkIn, onOpenSettings, onSelectMeal, onOpenHistory, onOpenCheckIn, onOpenPlanner, onOpenCooking, onAdjustRecommendation }: Props) {
   const latest = recentLogs[0];
 
   return (
@@ -51,11 +52,14 @@ export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, recent
 
       <SurfaceCard style={styles.spacedCard}>
         <View style={styles.inlineHeader}>
-          <Text style={styles.sectionTitle}>플래너 모드</Text>
-          <Text style={styles.sectionMeta}>주간 초안</Text>
+          <Text style={styles.sectionTitle}>플래너 · 장보기 · 요리</Text>
+          <Text style={styles.sectionMeta}>운영 3축</Text>
         </View>
-        <Text style={styles.cardDescription}>오늘 추천을 넘어, 이번 주 식단을 한 번에 잡고 고정/교체/재생성할 수 있습니다.</Text>
-        <AppButton label="주간 플래너 보기" onPress={onOpenPlanner} />
+        <Text style={styles.cardDescription}>오늘 추천을 넘어, 주간 계획-장보기-요리 실행까지 이어지는 구조입니다.</Text>
+        <View style={styles.utilityRow}>
+          <View style={styles.utilityButton}><AppButton label="주간 플래너" onPress={onOpenPlanner} /></View>
+          <View style={styles.utilityButton}><AppButton label="요리 모드" onPress={onOpenCooking} variant="secondary" /></View>
+        </View>
       </SurfaceCard>
 
       <SurfaceCard style={styles.spacedCard}>
@@ -114,6 +118,8 @@ const styles = StyleSheet.create({
   contextChip: { backgroundColor: colors.white, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
   contextChipText: { color: colors.greenStrong, fontSize: 13, fontWeight: '700' },
   actionGap: { marginBottom: 10 },
+  utilityRow: { flexDirection: 'row', gap: 10 },
+  utilityButton: { flex: 1 },
   adjustmentWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
   adjustmentButton: { minWidth: '47%' },
   mealRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },

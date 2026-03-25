@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { createMealLog, generateShoppingList, generateWeeklyPlan, getMealOptions, getWeeklyStats } from '../data/options';
+import { createMealLog, generateShoppingList, generateWeeklyPlan, getCookingSteps, getMealOptions, getWeeklyStats } from '../data/options';
 import { loadAppState, saveAppState } from '../storage/appStorage';
 import {
   AdjustmentMode,
@@ -39,6 +39,7 @@ export function useProfileState() {
   const [hydrated, setHydrated] = useState(false);
   const [checkIn, setCheckIn] = useState<CheckInState>(initialCheckIn);
   const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlanItem[]>([]);
+  const [currentCookingStep, setCurrentCookingStep] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -107,6 +108,26 @@ export function useProfileState() {
     setWeeklyPlan((prev) => prev.map((item) => (item.day === day ? { ...item, fixed: !item.fixed } : item)));
   };
 
+  const getCookingState = (mealTitle?: string) => {
+    const steps = getCookingSteps(mealTitle);
+    return {
+      steps,
+      currentCookingStep,
+      currentStepData: steps[currentCookingStep] ?? steps[0],
+    };
+  };
+
+  const nextCookingStep = (mealTitle?: string) => {
+    const steps = getCookingSteps(mealTitle);
+    setCurrentCookingStep((prev) => Math.min(prev + 1, steps.length - 1));
+  };
+
+  const prevCookingStep = () => {
+    setCurrentCookingStep((prev) => Math.max(prev - 1, 0));
+  };
+
+  const resetCookingStep = () => setCurrentCookingStep(0);
+
   return {
     profile,
     goal,
@@ -120,6 +141,7 @@ export function useProfileState() {
     checkIn,
     weeklyPlan,
     shoppingItems,
+    getCookingState,
     actions: {
       setGoal,
       setEatingStyle,
@@ -128,6 +150,9 @@ export function useProfileState() {
       saveMealLog: saveMealLogEntry,
       regenerateWeeklyPlan,
       toggleWeeklyPlanFixed,
+      nextCookingStep,
+      prevCookingStep,
+      resetCookingStep,
       ...updateCheckIn,
     },
   };

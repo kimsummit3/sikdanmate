@@ -1,6 +1,7 @@
 import {
   CheckInState,
   Constraint,
+  CookingStep,
   EatingStyle,
   Goal,
   LogResult,
@@ -93,7 +94,6 @@ export function generateShoppingList(plan: WeeklyPlanItem[]): ShoppingItem[] {
   const joined = plan.map((item) => item.mealTitle).join(' ');
   const list: ShoppingItem[] = [];
   const push = (item: ShoppingItem) => list.push(item);
-
   if (joined.includes('닭가슴살')) push({ id: 'protein-1', category: '단백질', name: '닭가슴살', quantity: '5팩', substitute: '두부/계란', storageTip: '냉장 2일, 나머지는 냉동' });
   if (joined.includes('두부')) push({ id: 'protein-2', category: '단백질', name: '두부', quantity: '3모', substitute: '연두부', storageTip: '냉장 보관, 개봉 후 빠르게 사용' });
   if (joined.includes('계란')) push({ id: 'protein-3', category: '단백질', name: '계란', quantity: '10구', substitute: '삶은계란팩', storageTip: '냉장 보관' });
@@ -101,12 +101,33 @@ export function generateShoppingList(plan: WeeklyPlanItem[]): ShoppingItem[] {
   if (joined.includes('바나나')) push({ id: 'etc-1', category: '기타', name: '바나나', quantity: '1송이', substitute: '사과', storageTip: '실온 후숙' });
   if (joined.includes('현미')) push({ id: 'carb-1', category: '탄수화물', name: '현미밥/현미', quantity: '7공기 분량', substitute: '잡곡밥', storageTip: '소분 냉동 가능' });
   if (joined.includes('김밥') || joined.includes('밥')) push({ id: 'carb-2', category: '탄수화물', name: '쌀/즉석밥', quantity: '5~7식 분량', substitute: '고구마', storageTip: '주간 단위 보충' });
-
-  if (list.length === 0) {
-    push({ id: 'fallback-1', category: '기타', name: '기본 장보기 묶음', quantity: '1세트', substitute: '주간 계획 재생성', storageTip: '계획에 맞춰 품목 보정' });
-  }
-
+  if (list.length === 0) push({ id: 'fallback-1', category: '기타', name: '기본 장보기 묶음', quantity: '1세트', substitute: '주간 계획 재생성', storageTip: '계획에 맞춰 품목 보정' });
   return list;
+}
+
+export function getCookingSteps(mealTitle?: string): CookingStep[] {
+  if (mealTitle?.includes('닭가슴살')) {
+    return [
+      { step: 1, title: '재료 준비', description: '닭가슴살, 샐러드 채소, 밥 또는 김밥을 꺼내고 양을 확인합니다.' },
+      { step: 2, title: '닭가슴살 조리', description: '팬에 닭가슴살을 굽거나 전자레인지용 제품이면 데웁니다.', timerHint: '3~5분' },
+      { step: 3, title: '채소 세팅', description: '샐러드 채소를 그릇에 담고 드레싱은 절반만 사용합니다.' },
+      { step: 4, title: '플레이팅', description: '닭가슴살과 김밥 또는 밥을 함께 담아 한 끼 구성을 마무리합니다.' },
+    ];
+  }
+  if (mealTitle?.includes('순두부찌개')) {
+    return [
+      { step: 1, title: '찌개 데우기', description: '순두부찌개를 냄비나 전자레인지로 충분히 데웁니다.', timerHint: '4~6분' },
+      { step: 2, title: '밥 양 조절', description: '밥은 2/3 공기 정도만 담아 과식을 방지합니다.' },
+      { step: 3, title: '추가 단백질 확인', description: '계란이나 두부가 부족하면 추가해 포만감을 보강합니다.' },
+      { step: 4, title: '식사 시작', description: '국물은 절반 정도만 먹는 기준으로 시작합니다.' },
+    ];
+  }
+  return [
+    { step: 1, title: '재료 확인', description: '선택한 식단에 필요한 재료를 먼저 모읍니다.' },
+    { step: 2, title: '기본 조리', description: '단백질과 채소를 먼저 준비하고 탄수화물은 양을 조절합니다.', timerHint: '5분' },
+    { step: 3, title: '분량 점검', description: '1인분 기준인지 확인하고 필요하면 양을 조정합니다.' },
+    { step: 4, title: '마무리', description: '플레이팅 후 바로 식사 기록으로 연결할 준비를 합니다.' },
+  ];
 }
 
 export function getWeeklyStats(profile: UserProfile, logs: MealLog[]): WeeklyStats {

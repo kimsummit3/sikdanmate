@@ -6,6 +6,7 @@ export type RootStackParamList = {
   CheckIn: undefined;
   Planner: undefined;
   Shopping: undefined;
+  Cooking: { mealTitle?: string } | undefined;
   Log: { meal: MealOption };
   History: undefined;
 };
