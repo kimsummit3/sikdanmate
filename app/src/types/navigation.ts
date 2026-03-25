@@ -1,14 +1,10 @@
-import { LogResult, MealOption } from './app';
+import { MealOption } from './app';
 
 export type RootStackParamList = {
   Onboarding: undefined;
   MainTabs: undefined;
   Log: { meal: MealOption };
+  History: undefined;
 };
 
 export type MainTabKey = 'home' | 'summary' | 'settings';
-
-export type AppSessionState = {
-  selectedMeal: MealOption | null;
-  selectedResult: LogResult | null;
-};

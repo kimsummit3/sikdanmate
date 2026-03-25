@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { BottomTabBar } from '../components/BottomTabBar';
 import { useProfileState } from '../hooks/useProfileState';
+import { HistoryScreen } from '../screens/HistoryScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LogScreen } from '../screens/LogScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
@@ -27,6 +28,7 @@ function MainTabs({
   selectedResult,
   onOpenSettings,
   onSelectMeal,
+  onOpenHistory,
   onSelectGoal,
   onSelectStyle,
   onToggleConstraint,
@@ -43,6 +45,7 @@ function MainTabs({
   selectedResult: any;
   onOpenSettings: () => void;
   onSelectMeal: (meal: MealOption) => void;
+  onOpenHistory: () => void;
   onSelectGoal: (goal: any) => void;
   onSelectStyle: (style: any) => void;
   onToggleConstraint: (constraint: any) => void;
@@ -57,8 +60,10 @@ function MainTabs({
             eatingStyle={eatingStyle}
             constraints={constraints}
             mealOptions={mealOptions}
+            recentLogs={mealLogs}
             onOpenSettings={onOpenSettings}
             onSelectMeal={onSelectMeal}
+            onOpenHistory={onOpenHistory}
           />
         )}
         {currentTab === 'summary' && (
@@ -139,6 +144,7 @@ export function AppNavigator() {
                 actions.setSelectedResult(null);
                 navigation.navigate('Log', { meal });
               }}
+              onOpenHistory={() => navigation.navigate('History')}
               onSelectGoal={actions.setGoal}
               onSelectStyle={actions.setEatingStyle}
               onToggleConstraint={actions.toggleConstraint}
@@ -164,6 +170,14 @@ export function AppNavigator() {
                   navigation.replace('MainTabs');
                 }
               }}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="History">
+          {({ navigation }) => (
+            <HistoryScreen
+              mealLogs={mealLogs}
+              onBack={() => navigation.goBack()}
             />
           )}
         </Stack.Screen>

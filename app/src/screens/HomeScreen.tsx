@@ -3,18 +3,29 @@ import { AppButton } from '../components/AppButton';
 import { AppHeader } from '../components/AppHeader';
 import { SurfaceCard } from '../components/SurfaceCard';
 import { colors } from '../styles/theme';
-import { Constraint, Goal, MealOption, EatingStyle } from '../types/app';
+import { Constraint, Goal, MealLog, MealOption, EatingStyle } from '../types/app';
 
 type Props = {
   goal: Goal;
   eatingStyle: EatingStyle;
   constraints: Constraint[];
   mealOptions: MealOption[];
+  recentLogs: MealLog[];
   onOpenSettings: () => void;
   onSelectMeal: (meal: MealOption) => void;
+  onOpenHistory: () => void;
 };
 
-export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, onOpenSettings, onSelectMeal }: Props) {
+export function HomeScreen({
+  goal,
+  eatingStyle,
+  constraints,
+  mealOptions,
+  recentLogs,
+  onOpenSettings,
+  onSelectMeal,
+  onOpenHistory,
+}: Props) {
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <AppHeader
@@ -35,6 +46,29 @@ export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, onOpen
               <Text style={styles.optionChipText}>{option}</Text>
             </View>
           ))}
+        </View>
+      </SurfaceCard>
+
+      <SurfaceCard style={styles.spacedCard}>
+        <View style={styles.sectionHeaderInline}>
+          <Text style={styles.sectionTitle}>최근 기록</Text>
+          <Text style={styles.sectionMeta}>{recentLogs.length}개</Text>
+        </View>
+        {recentLogs.length === 0 ? (
+          <Text style={styles.emptyText}>아직 기록이 없습니다.</Text>
+        ) : (
+          recentLogs.slice(0, 2).map((log) => (
+            <View key={log.id} style={styles.logRow}>
+              <View style={styles.logMain}>
+                <Text style={styles.logMeal}>{log.mealTitle}</Text>
+                <Text style={styles.logDate}>{new Date(log.createdAt).toLocaleDateString('ko-KR')}</Text>
+              </View>
+              <Text style={styles.logResult}>{log.result}</Text>
+            </View>
+          ))
+        )}
+        <View style={styles.historyButtonWrap}>
+          <AppButton label="전체 기록 보기" onPress={onOpenHistory} variant="secondary" />
         </View>
       </SurfaceCard>
 
@@ -77,8 +111,16 @@ const styles = StyleSheet.create({
   optionChip: { backgroundColor: colors.chip, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
   optionChipText: { color: '#335339', fontSize: 13, fontWeight: '600' },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 8 },
+  sectionHeaderInline: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   sectionTitle: { fontSize: 22, fontWeight: '700', color: colors.text },
   sectionMeta: { color: colors.textSoft, fontWeight: '600' },
+  emptyText: { fontSize: 15, color: colors.textMuted },
+  logRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#EEF1EA' },
+  logMain: { flex: 1, paddingRight: 10 },
+  logMeal: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: 4 },
+  logDate: { fontSize: 12, color: colors.textSoft },
+  logResult: { fontSize: 13, fontWeight: '700', color: colors.greenStrong },
+  historyButtonWrap: { marginTop: 12 },
   mealCard: { marginBottom: 14 },
   mealMetaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   mealIndex: { fontSize: 12, fontWeight: '700', color: colors.accent },
