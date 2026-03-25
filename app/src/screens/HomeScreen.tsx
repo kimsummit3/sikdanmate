@@ -26,75 +26,77 @@ export function HomeScreen({
   onSelectMeal,
   onOpenHistory,
 }: Props) {
+  const latest = recentLogs[0];
+
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <AppHeader
-        eyebrow="식단메이트"
-        title="오늘 뭐 먹지?"
-        subtitle="바로 정하고, 가볍게 기록하고, 다음 한 끼로 다시 이어가세요."
+        eyebrow="식단메이트 · 대화 모드"
+        title="오늘 식단 운영을\n시작해볼까요?"
+        subtitle="폼보다 대화로 시작하고, 오늘 식단 결정부터 다음 끼니 보정까지 이어갑니다."
         actionLabel="설정 수정"
         onPressAction={onOpenSettings}
       />
 
-      <SurfaceCard style={styles.spacedCard}>
-        <Text style={styles.cardLabel}>현재 상태</Text>
-        <Text style={styles.cardTitle}>점심 전 · {eatingStyle} · {goal}</Text>
-        <Text style={styles.cardDescription}>지금 상황에 맞는 식단 선택지를 바로 제안합니다.</Text>
-        <View style={styles.optionRow}>
-          {constraints.map((option) => (
-            <View key={option} style={styles.optionChip}>
-              <Text style={styles.optionChipText}>{option}</Text>
-            </View>
+      <SurfaceCard tone="soft" style={styles.spacedCard}>
+        <Text style={styles.cardLabel}>오늘 체크인</Text>
+        <Text style={styles.checkinTitle}>지금 어떤 상황인가요?</Text>
+        <Text style={styles.checkinSubtitle}>집/밖 · 배고픔 · 일정 · 예산 · 땡기는 음식까지 대화로 바로 조정합니다.</Text>
+        <View style={styles.chipRow}>
+          <View style={styles.contextChip}><Text style={styles.contextChipText}>{eatingStyle}</Text></View>
+          <View style={styles.contextChip}><Text style={styles.contextChipText}>{goal}</Text></View>
+          {constraints.slice(0, 2).map((option) => (
+            <View key={option} style={styles.contextChip}><Text style={styles.contextChipText}>{option}</Text></View>
           ))}
         </View>
+        <View style={styles.actionGap}>
+          <AppButton label="음성으로 체크인 시작" onPress={() => onSelectMeal(mealOptions[0])} />
+        </View>
+        <AppButton label="텍스트로 빠르게 시작" onPress={() => onSelectMeal(mealOptions[0])} variant="secondary" />
       </SurfaceCard>
 
       <SurfaceCard style={styles.spacedCard}>
-        <View style={styles.sectionHeaderInline}>
-          <Text style={styles.sectionTitle}>최근 기록</Text>
-          <Text style={styles.sectionMeta}>{recentLogs.length}개</Text>
-        </View>
-        {recentLogs.length === 0 ? (
-          <Text style={styles.emptyText}>아직 기록이 없습니다.</Text>
-        ) : (
-          recentLogs.slice(0, 2).map((log) => (
-            <View key={log.id} style={styles.logRow}>
-              <View style={styles.logMain}>
-                <Text style={styles.logMeal}>{log.mealTitle}</Text>
-                <Text style={styles.logDate}>{new Date(log.createdAt).toLocaleDateString('ko-KR')}</Text>
-              </View>
-              <Text style={styles.logResult}>{log.result}</Text>
+        <Text style={styles.cardLabel}>지금 바로 제안할 수 있는 식단</Text>
+        <Text style={styles.cardDescription}>체크인을 시작하면 아래 후보 중 하나를 기반으로 바로 조정합니다.</Text>
+        {mealOptions.map((meal, index) => (
+          <View key={meal.title} style={[styles.mealRow, index !== mealOptions.length - 1 && styles.rowBorder]}>
+            <View style={styles.mealMain}>
+              <Text style={styles.mealTitle}>{meal.title}</Text>
+              <Text style={styles.mealMeta}>{meal.context} · {meal.tag}</Text>
             </View>
-          ))
+            <Text style={styles.mealArrow}>→</Text>
+          </View>
+        ))}
+      </SurfaceCard>
+
+      <SurfaceCard style={styles.spacedCard}>
+        <View style={styles.inlineHeader}>
+          <Text style={styles.sectionTitle}>최근 운영 상태</Text>
+          <Text style={styles.sectionMeta}>{recentLogs.length}개 기록</Text>
+        </View>
+        {latest ? (
+          <>
+            <Text style={styles.latestTitle}>{latest.mealTitle}</Text>
+            <Text style={styles.latestMeta}>
+              최근 결과: {latest.result} · {new Date(latest.createdAt).toLocaleDateString('ko-KR')}
+            </Text>
+            <Text style={styles.latestDescription}>
+              이 결과를 기준으로 다음 끼니와 주간 요약이 자동 보정됩니다.
+            </Text>
+          </>
+        ) : (
+          <Text style={styles.latestDescription}>아직 기록이 없습니다. 오늘 첫 체크인부터 시작하면 됩니다.</Text>
         )}
-        <View style={styles.historyButtonWrap}>
+        <View style={styles.actionGap}>
           <AppButton label="전체 기록 보기" onPress={onOpenHistory} variant="secondary" />
         </View>
       </SurfaceCard>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>오늘의 추천</Text>
-        <Text style={styles.sectionMeta}>{mealOptions.length} options</Text>
-      </View>
-
-      {mealOptions.map((meal, index) => (
-        <SurfaceCard key={meal.title} style={styles.mealCard}>
-          <View style={styles.mealMetaRow}>
-            <Text style={styles.mealIndex}>Option {index + 1}</Text>
-            <View style={styles.mealTag}><Text style={styles.mealTagText}>{meal.tag}</Text></View>
-          </View>
-          <Text style={styles.mealTitle}>{meal.title}</Text>
-          <Text style={styles.mealContext}>{meal.context}</Text>
-          <Text style={styles.mealDescription}>{meal.description}</Text>
-          <AppButton label="이걸로 갈게요" onPress={() => onSelectMeal(meal)} />
-        </SurfaceCard>
-      ))}
-
-      <SurfaceCard tone="soft" style={styles.recoveryCard}>
-        <Text style={styles.recoveryLabel}>복귀 UX</Text>
-        <Text style={styles.recoveryTitle}>망쳐도 괜찮아요. 다음 한 끼부터 다시 가면 됩니다.</Text>
-        <Text style={styles.recoveryDescription}>
-          식단메이트는 실패를 기록하는 앱이 아니라, 복귀를 설계하는 앱입니다.
+      <SurfaceCard tone="soft" style={styles.spacedCard}>
+        <Text style={styles.cardLabel}>운영 원칙</Text>
+        <Text style={styles.principleTitle}>추천보다 중요한 건, 계속 맞춰지는 운영입니다.</Text>
+        <Text style={styles.principleDescription}>
+          식단메이트는 단순 추천 앱이 아니라, 사용자의 현실 변수에 맞춰 식단·기록·복귀를 계속 조정하는 운영체제를 지향합니다.
         </Text>
       </SurfaceCard>
     </ScrollView>
@@ -103,34 +105,27 @@ export function HomeScreen({
 
 const styles = StyleSheet.create({
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 32 },
-  spacedCard: { marginBottom: 24 },
+  spacedCard: { marginBottom: 20 },
   cardLabel: { fontSize: 12, fontWeight: '700', color: colors.greenDeep, marginBottom: 10 },
-  cardTitle: { fontSize: 22, fontWeight: '700', color: colors.text, lineHeight: 30, marginBottom: 8 },
-  cardDescription: { fontSize: 15, lineHeight: 22, color: colors.textMuted, marginBottom: 14 },
-  optionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  optionChip: { backgroundColor: colors.chip, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
-  optionChipText: { color: '#335339', fontSize: 13, fontWeight: '600' },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, marginTop: 8 },
-  sectionHeaderInline: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  cardDescription: { fontSize: 15, lineHeight: 22, color: colors.textMuted, marginBottom: 10 },
+  checkinTitle: { fontSize: 24, fontWeight: '800', color: colors.text, lineHeight: 32, marginBottom: 8 },
+  checkinSubtitle: { fontSize: 15, lineHeight: 22, color: colors.textMuted, marginBottom: 14 },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  contextChip: { backgroundColor: colors.white, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
+  contextChipText: { color: colors.greenStrong, fontSize: 13, fontWeight: '700' },
+  actionGap: { marginBottom: 10 },
+  mealRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
+  rowBorder: { borderBottomWidth: 1, borderBottomColor: '#EEF1EA' },
+  mealMain: { flex: 1, paddingRight: 12 },
+  mealTitle: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 4 },
+  mealMeta: { fontSize: 13, color: colors.textMuted },
+  mealArrow: { fontSize: 18, color: colors.greenStrong, fontWeight: '700' },
+  inlineHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   sectionTitle: { fontSize: 22, fontWeight: '700', color: colors.text },
   sectionMeta: { color: colors.textSoft, fontWeight: '600' },
-  emptyText: { fontSize: 15, color: colors.textMuted },
-  logRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#EEF1EA' },
-  logMain: { flex: 1, paddingRight: 10 },
-  logMeal: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: 4 },
-  logDate: { fontSize: 12, color: colors.textSoft },
-  logResult: { fontSize: 13, fontWeight: '700', color: colors.greenStrong },
-  historyButtonWrap: { marginTop: 12 },
-  mealCard: { marginBottom: 14 },
-  mealMetaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  mealIndex: { fontSize: 12, fontWeight: '700', color: colors.accent },
-  mealTag: { backgroundColor: colors.greenSurface, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6 },
-  mealTagText: { color: colors.greenStrong, fontSize: 12, fontWeight: '700' },
-  mealTitle: { fontSize: 20, fontWeight: '700', color: colors.text, lineHeight: 28, marginBottom: 6 },
-  mealContext: { fontSize: 13, color: colors.greenDeep, fontWeight: '600', marginBottom: 8 },
-  mealDescription: { fontSize: 15, lineHeight: 22, color: colors.textMuted, marginBottom: 16 },
-  recoveryCard: { marginTop: 8 },
-  recoveryLabel: { fontSize: 12, fontWeight: '700', color: colors.greenDeep, marginBottom: 8 },
-  recoveryTitle: { fontSize: 22, fontWeight: '800', color: '#1E3221', lineHeight: 30, marginBottom: 10 },
-  recoveryDescription: { fontSize: 15, lineHeight: 22, color: '#4E6151' },
+  latestTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 6 },
+  latestMeta: { fontSize: 13, color: colors.greenDeep, fontWeight: '600', marginBottom: 8 },
+  latestDescription: { fontSize: 15, lineHeight: 22, color: colors.textMuted },
+  principleTitle: { fontSize: 22, fontWeight: '800', color: '#1E3221', lineHeight: 30, marginBottom: 10 },
+  principleDescription: { fontSize: 15, lineHeight: 22, color: '#4E6151' },
 });
