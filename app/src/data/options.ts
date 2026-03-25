@@ -1,10 +1,76 @@
-import { Constraint, EatingStyle, Goal, LogResult, MealLog, MealOption, UserProfile, WeeklyStats } from '../types/app';
+import {
+  CheckInState,
+  Constraint,
+  EatingStyle,
+  Goal,
+  LogResult,
+  MealLog,
+  MealOption,
+  UserProfile,
+  WeeklyStats,
+} from '../types/app';
 
 export const goalOptions: Goal[] = ['감량', '유지', '건강 식습관'];
 export const styleOptions: EatingStyle[] = ['일반식 중심', '간편식 중심', '외식 많음'];
 export const constraintOptions: Constraint[] = ['편의점 가능', '배달 자주 씀', '요리 가능', '예산 민감'];
 
-export function getMealOptions(eatingStyle: EatingStyle): MealOption[] {
+export function getMealOptions(eatingStyle: EatingStyle, checkIn?: CheckInState): MealOption[] {
+  const place = checkIn?.place ?? '밖';
+  const budget = checkIn?.budget ?? '보통';
+  const hunger = checkIn?.hunger ?? '보통';
+  const craving = checkIn?.craving ?? '';
+
+  if (place === '집' && hunger === '많이 배고픔') {
+    return [
+      {
+        title: craving === '한식' ? '계란말이 + 두부부침 + 밥 1공기' : '닭가슴살 덮밥 + 된장국',
+        description: '집에서 빠르게 만들 수 있고 포만감이 충분한 구성입니다.',
+        tag: '집밥 포만감',
+        context: '집 · 많이 배고픔',
+      },
+      {
+        title: budget === '절약' ? '참치김치볶음 + 밥 + 계란후라이' : '소불고기 덮밥 + 샐러드',
+        description: '예산과 배고픔을 같이 고려한 현실적인 집밥 옵션입니다.',
+        tag: '현실 조정',
+        context: '집 · 예산 반영',
+      },
+    ];
+  }
+
+  if (place === '밖' && budget === '절약') {
+    return [
+      {
+        title: '김밥 + 삶은계란 + 무가당 두유',
+        description: '밖에서도 비용 부담을 줄이면서 흐름을 크게 무너뜨리지 않는 조합입니다.',
+        tag: '절약 모드',
+        context: '밖 · 저예산',
+      },
+      {
+        title: '편의점 닭가슴살 + 컵샐러드 + 바나나',
+        description: '간단하지만 단백질과 포만감을 어느 정도 챙길 수 있는 선택입니다.',
+        tag: '편의점 대응',
+        context: '밖 · 빠른 한 끼',
+      },
+    ];
+  }
+
+  if (craving === '가벼운 것') {
+    return [
+      {
+        title: '그릭요거트 + 바나나 + 견과류',
+        description: '부담을 줄이면서도 허기를 과하게 남기지 않는 가벼운 선택입니다.',
+        tag: '가벼움 우선',
+        context: '소화 부담 낮춤',
+      },
+      {
+        title: '연두부 + 샐러드 + 작은 밥',
+        description: '과식 없이 흐름만 유지하는 쪽에 맞춘 구성입니다.',
+        tag: '가벼운 일반식',
+        context: '조절 중심',
+      },
+    ];
+  }
+
   if (eatingStyle === '외식 많음') {
     return [
       {

@@ -65,7 +65,7 @@ export function useProfileState() {
   }, [goal, eatingStyle, constraints, mealLogs, hydrated]);
 
   const profile: UserProfile = { goal, eatingStyle, constraints };
-  const mealOptions = useMemo(() => getMealOptions(eatingStyle), [eatingStyle]);
+  const mealOptions = useMemo(() => getMealOptions(eatingStyle, checkIn), [eatingStyle, checkIn]);
   const weeklyStats = useMemo(() => getWeeklyStats(profile, mealLogs), [profile, mealLogs]);
 
   const toggleConstraint = (item: Constraint) => {

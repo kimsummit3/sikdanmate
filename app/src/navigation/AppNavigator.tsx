@@ -24,8 +24,9 @@ function MainTabs({
   eatingStyle,
   constraints,
   mealOptions,
-  weeklyStats,
   mealLogs,
+  checkIn,
+  weeklyStats,
   selectedResult,
   onOpenSettings,
   onSelectMeal,
@@ -42,8 +43,9 @@ function MainTabs({
   eatingStyle: any;
   constraints: any;
   mealOptions: any;
-  weeklyStats: any;
   mealLogs: any;
+  checkIn: any;
+  weeklyStats: any;
   selectedResult: any;
   onOpenSettings: () => void;
   onSelectMeal: (meal: MealOption) => void;
@@ -64,6 +66,7 @@ function MainTabs({
             constraints={constraints}
             mealOptions={mealOptions}
             recentLogs={mealLogs}
+            checkIn={checkIn}
             onOpenSettings={onOpenSettings}
             onSelectMeal={onSelectMeal}
             onOpenHistory={onOpenHistory}
@@ -139,8 +142,9 @@ export function AppNavigator() {
               eatingStyle={eatingStyle}
               constraints={constraints}
               mealOptions={mealOptions}
-              weeklyStats={weeklyStats}
               mealLogs={mealLogs}
+              checkIn={checkIn}
+              weeklyStats={weeklyStats}
               selectedResult={selectedResult}
               onOpenSettings={() => setCurrentTab('settings')}
               onSelectMeal={(meal) => {
