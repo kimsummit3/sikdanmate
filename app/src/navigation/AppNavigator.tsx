@@ -20,7 +20,7 @@ import { MainTabKey, RootStackParamList } from '../types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function MainTabs({ currentTab, onChangeTab, goal, eatingStyle, constraints, mealOptions, mealLogs, checkIn, weeklyStats, selectedResult, onOpenSettings, onSelectMeal, onOpenHistory, onOpenCheckIn, onOpenPlanner, onOpenCooking, onAdjustRecommendation, onSelectGoal, onSelectStyle, onToggleConstraint, onBackHome }: any) {
+function MainTabs({ currentTab, onChangeTab, goal, eatingStyle, constraints, mealOptions, mealLogs, checkIn, recommendation, weeklyStats, selectedResult, onOpenSettings, onSelectMeal, onOpenHistory, onOpenCheckIn, onOpenPlanner, onOpenCooking, onRefreshRecommendation, onAdjustRecommendation, onSelectGoal, onSelectStyle, onToggleConstraint, onBackHome }: any) {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
@@ -32,12 +32,14 @@ function MainTabs({ currentTab, onChangeTab, goal, eatingStyle, constraints, mea
             mealOptions={mealOptions}
             recentLogs={mealLogs}
             checkIn={checkIn}
+            recommendation={recommendation}
             onOpenSettings={onOpenSettings}
             onSelectMeal={onSelectMeal}
             onOpenHistory={onOpenHistory}
             onOpenCheckIn={onOpenCheckIn}
             onOpenPlanner={onOpenPlanner}
             onOpenCooking={onOpenCooking}
+            onRefreshRecommendation={onRefreshRecommendation}
             onAdjustRecommendation={onAdjustRecommendation}
           />
         )}
@@ -61,15 +63,15 @@ function SplashScreen() {
 export function AppNavigator() {
   const [currentTab, setCurrentTab] = useState<MainTabKey>('home');
   const [selectedMeal, setSelectedMeal] = useState<MealOption | null>(null);
-  const { goal, eatingStyle, constraints, selectedResult, mealOptions, weeklyStats, mealLogs, hydrated, checkIn, weeklyPlan, shoppingItems, getCookingState, actions } = useProfileState();
+  const { goal, eatingStyle, constraints, selectedResult, mealOptions, weeklyStats, mealLogs, hydrated, checkIn, weeklyPlan, shoppingItems, recommendation, hasCompletedOnboarding, getCookingState, actions } = useProfileState();
 
   if (!hydrated) return <SplashScreen />;
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Onboarding">
+      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={hasCompletedOnboarding ? 'MainTabs' : 'Onboarding'}>
         <Stack.Screen name="Onboarding">
-          {({ navigation }) => <OnboardingScreen goal={goal} eatingStyle={eatingStyle} constraints={constraints} onSelectGoal={actions.setGoal} onSelectStyle={actions.setEatingStyle} onToggleConstraint={actions.toggleConstraint} onContinue={() => navigation.replace('MainTabs')} />}
+          {({ navigation }) => <OnboardingScreen goal={goal} eatingStyle={eatingStyle} constraints={constraints} onSelectGoal={actions.setGoal} onSelectStyle={actions.setEatingStyle} onToggleConstraint={actions.toggleConstraint} onContinue={() => { actions.completeOnboarding(); navigation.replace('MainTabs'); }} />}
         </Stack.Screen>
         <Stack.Screen name="MainTabs">
           {({ navigation }) => (
@@ -82,21 +84,23 @@ export function AppNavigator() {
               mealOptions={mealOptions}
               mealLogs={mealLogs}
               checkIn={checkIn}
+              recommendation={recommendation}
               weeklyStats={weeklyStats}
               selectedResult={selectedResult}
               onOpenSettings={() => setCurrentTab('settings')}
               onSelectMeal={(meal: MealOption) => {
-                setSelectedMeal(meal);
-                actions.setSelectedResult(null);
-                navigation.navigate('Log', { meal });
+                const nextMeal = actions.selectMeal(meal);
+                setSelectedMeal(nextMeal);
+                navigation.navigate('Log', { meal: nextMeal });
               }}
               onOpenHistory={() => navigation.navigate('History')}
               onOpenCheckIn={() => navigation.navigate('CheckIn')}
               onOpenPlanner={() => navigation.navigate('Planner')}
               onOpenCooking={() => {
                 actions.resetCookingStep();
-                navigation.navigate('Cooking', { mealTitle: mealOptions[0]?.title });
+                navigation.navigate('Cooking', { mealTitle: recommendation?.defaultOption.title ?? mealOptions[0]?.title });
               }}
+              onRefreshRecommendation={actions.regenerateRecommendation}
               onAdjustRecommendation={actions.setAdjustmentMode}
               onSelectGoal={actions.setGoal}
               onSelectStyle={actions.setEatingStyle}
@@ -106,7 +110,7 @@ export function AppNavigator() {
           )}
         </Stack.Screen>
         <Stack.Screen name="CheckIn">
-          {({ navigation }) => <CheckInScreen checkIn={checkIn} onSelectPlace={actions.setPlace} onSelectHunger={actions.setHunger} onSelectBudget={actions.setBudget} onSetCravingPreset={actions.setCraving} onContinue={() => { setSelectedMeal(mealOptions[0]); navigation.navigate('Log', { meal: mealOptions[0] }); }} onBack={() => navigation.goBack()} />}
+          {({ navigation }) => <CheckInScreen checkIn={checkIn} onSelectPlace={actions.setPlace} onSelectHunger={actions.setHunger} onSelectBudget={actions.setBudget} onSetCravingPreset={actions.setCraving} onContinue={() => { const generated = actions.regenerateRecommendation(); const nextMeal = actions.selectMeal(generated.defaultOption); setSelectedMeal(nextMeal); navigation.navigate('Log', { meal: nextMeal }); }} onBack={() => navigation.goBack()} />}
         </Stack.Screen>
         <Stack.Screen name="Planner">
           {({ navigation }) => <PlannerScreen weeklyPlan={weeklyPlan} onBack={() => navigation.goBack()} onRegenerate={actions.regenerateWeeklyPlan} onToggleFixed={actions.toggleWeeklyPlanFixed} onOpenShopping={() => navigation.navigate('Shopping')} />}

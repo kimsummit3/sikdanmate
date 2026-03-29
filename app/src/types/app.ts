@@ -7,12 +7,32 @@ export type CheckInPlace = '집' | '밖';
 export type HungerLevel = '가벼움' | '보통' | '많이 배고픔';
 export type BudgetLevel = '절약' | '보통' | '여유 있음';
 export type AdjustmentMode = '기본' | '더 가볍게' | '더 든든하게' | '더 저렴하게' | '외식 중심';
+export type MealTier = 'ideal' | 'realistic' | 'emergency';
+export type EventName =
+  | 'meal_recommendation_requested'
+  | 'meal_options_presented'
+  | 'meal_option_selected'
+  | 'meal_logged'
+  | 'meal_deviation_reported';
 
 export type MealOption = {
+  id: string;
   title: string;
   description: string;
   tag: string;
   context: string;
+  tier: MealTier;
+  adherenceScore: number;
+  prepTimeMin: number;
+  budgetBand: BudgetLevel;
+};
+
+export type RecommendationSet = {
+  recommendationId: string;
+  optionSetId: string;
+  defaultOption: MealOption;
+  alternatives: MealOption[];
+  generatedAt: string;
 };
 
 export type WeeklyPlanItem = {
@@ -40,9 +60,21 @@ export type CookingStep = {
 
 export type MealLog = {
   id: string;
+  recommendationId?: string;
+  selectedOptionId?: string;
   mealTitle: string;
   result: LogResult;
   createdAt: string;
+};
+
+export type AppEvent = {
+  id: string;
+  eventName: EventName;
+  occurredAt: string;
+  recommendationId?: string;
+  optionSetId?: string;
+  selectedOptionId?: string;
+  payload?: Record<string, string | number | boolean | null | undefined>;
 };
 
 export type CheckInState = {

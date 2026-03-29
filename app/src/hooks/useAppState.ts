@@ -59,7 +59,7 @@ export function useAppState() {
 
   const saveMealLog = (meal: MealOption | null, result: LogResult | null) => {
     if (!meal || !result) return false;
-    const log = createMealLog(meal.title, result);
+    const log = createMealLog(meal, result);
     setMealLogs((prev) => [log, ...prev].slice(0, 20));
     return true;
   };

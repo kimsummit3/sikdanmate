@@ -3,7 +3,7 @@ import { AppButton } from '../components/AppButton';
 import { AppHeader } from '../components/AppHeader';
 import { SurfaceCard } from '../components/SurfaceCard';
 import { colors } from '../styles/theme';
-import { AdjustmentMode, CheckInState, Constraint, Goal, MealLog, MealOption, EatingStyle } from '../types/app';
+import { AdjustmentMode, CheckInState, Constraint, Goal, MealLog, MealOption, EatingStyle, RecommendationSet } from '../types/app';
 
 type Props = {
   goal: Goal;
@@ -12,42 +12,97 @@ type Props = {
   mealOptions: MealOption[];
   recentLogs: MealLog[];
   checkIn: CheckInState;
+  recommendation: RecommendationSet | null;
   onOpenSettings: () => void;
   onSelectMeal: (meal: MealOption) => void;
   onOpenHistory: () => void;
   onOpenCheckIn: () => void;
   onOpenPlanner: () => void;
   onOpenCooking: () => void;
+  onRefreshRecommendation: () => void;
   onAdjustRecommendation: (mode: AdjustmentMode) => void;
 };
 
 const adjustmentModes: AdjustmentMode[] = ['더 가볍게', '더 든든하게', '더 저렴하게', '외식 중심'];
 
-export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, recentLogs, checkIn, onOpenSettings, onSelectMeal, onOpenHistory, onOpenCheckIn, onOpenPlanner, onOpenCooking, onAdjustRecommendation }: Props) {
+export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, recentLogs, checkIn, recommendation, onOpenSettings, onSelectMeal, onOpenHistory, onOpenCheckIn, onOpenPlanner, onOpenCooking, onRefreshRecommendation, onAdjustRecommendation }: Props) {
   const latest = recentLogs[0];
+  const defaultMeal = recommendation?.defaultOption;
+  const alternatives = recommendation?.alternatives ?? [];
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <AppHeader
-        eyebrow="식단메이트 · 대화 모드"
+        eyebrow="식단메이트 · 실행 루프"
         title="오늘 식단 운영을\n시작해볼까요?"
-        subtitle="폼보다 대화로 시작하고, 오늘 식단 결정부터 다음 끼니 보정까지 이어갑니다."
+        subtitle="지금은 추천보다 실행이 중요합니다. 오늘 한 끼 선택부터 기록까지 바로 이어가면 됩니다."
         actionLabel="설정 수정"
         onPressAction={onOpenSettings}
       />
 
       <SurfaceCard tone="soft" style={styles.spacedCard}>
+        <Text style={styles.cardLabel}>프로필 상태</Text>
+        <Text style={styles.checkinTitle}>{goal} · {eatingStyle}</Text>
+        <Text style={styles.checkinSubtitle}>현실 조건: {constraints.join(', ') || '없음'}</Text>
+      </SurfaceCard>
+
+      <SurfaceCard tone="soft" style={styles.spacedCard}>
         <Text style={styles.cardLabel}>오늘 체크인</Text>
         <Text style={styles.checkinTitle}>지금 어떤 상황인가요?</Text>
-        <Text style={styles.checkinSubtitle}>현재 체크인 기준으로 추천이 바로 달라집니다.</Text>
+        <Text style={styles.checkinSubtitle}>현재 체크인 기준으로 추천 세트가 새로 생성됩니다.</Text>
         <View style={styles.chipRow}>
           <View style={styles.contextChip}><Text style={styles.contextChipText}>{checkIn.place}</Text></View>
           <View style={styles.contextChip}><Text style={styles.contextChipText}>{checkIn.hunger}</Text></View>
           <View style={styles.contextChip}><Text style={styles.contextChipText}>{checkIn.budget}</Text></View>
           <View style={styles.contextChip}><Text style={styles.contextChipText}>{checkIn.craving}</Text></View>
         </View>
-        <View style={styles.actionGap}><AppButton label="음성으로 체크인 시작" onPress={onOpenCheckIn} /></View>
-        <AppButton label="텍스트로 빠르게 시작" onPress={onOpenCheckIn} variant="secondary" />
+        <View style={styles.actionGap}><AppButton label="체크인 수정" onPress={onOpenCheckIn} /></View>
+        <AppButton label="이 기준으로 추천 다시 받기" onPress={onRefreshRecommendation} variant="secondary" />
+      </SurfaceCard>
+
+      <SurfaceCard style={styles.spacedCard}>
+        <View style={styles.inlineHeader}>
+          <Text style={styles.sectionTitle}>오늘의 기본 추천</Text>
+          <Text style={styles.sectionMeta}>{recommendation ? '기본 1 + 대안 2' : '로딩 중'}</Text>
+        </View>
+        {defaultMeal ? (
+          <>
+            <View style={styles.defaultCard}>
+              <Text style={styles.defaultBadge}>기본 추천</Text>
+              <Text style={styles.mealTitle}>{defaultMeal.title}</Text>
+              <Text style={styles.mealMeta}>{defaultMeal.context} · {defaultMeal.tag}</Text>
+              <Text style={styles.defaultInfo}>티어 {defaultMeal.tier} · 실행가능성 {Math.round(defaultMeal.adherenceScore * 100)}점 · 준비 {defaultMeal.prepTimeMin}분</Text>
+              <Text style={styles.cardDescription}>{defaultMeal.description}</Text>
+              <AppButton label="이 식단으로 기록 시작" onPress={() => onSelectMeal(defaultMeal)} />
+            </View>
+            {alternatives.length > 0 && (
+              <View style={styles.altSection}>
+                <Text style={styles.altTitle}>대안 옵션</Text>
+                {alternatives.map((meal) => (
+                  <View key={meal.id} style={styles.mealRow}>
+                    <View style={styles.mealMain}>
+                      <Text style={styles.mealTitle}>{meal.title}</Text>
+                      <Text style={styles.mealMeta}>{meal.tier} · {meal.context}</Text>
+                    </View>
+                    <View style={styles.inlineAction}><AppButton label="선택" onPress={() => onSelectMeal(meal)} variant="secondary" /></View>
+                  </View>
+                ))}
+              </View>
+            )}
+          </>
+        ) : (
+          <Text style={styles.latestDescription}>추천을 생성해 주세요.</Text>
+        )}
+      </SurfaceCard>
+
+      <SurfaceCard style={styles.spacedCard}>
+        <Text style={styles.cardLabel}>빠른 보정</Text>
+        <Text style={styles.cardDescription}>{checkIn.place} · {checkIn.hunger} · {checkIn.budget} · {checkIn.craving} 기준으로 추천을 다시 좁힐 수 있습니다.</Text>
+        <View style={styles.adjustmentWrap}>
+          {adjustmentModes.map((mode) => (
+            <View key={mode} style={styles.adjustmentButton}><AppButton label={mode} onPress={() => onAdjustRecommendation(mode)} variant="secondary" /></View>
+          ))}
+        </View>
       </SurfaceCard>
 
       <SurfaceCard style={styles.spacedCard}>
@@ -63,25 +118,6 @@ export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, recent
       </SurfaceCard>
 
       <SurfaceCard style={styles.spacedCard}>
-        <Text style={styles.cardLabel}>지금 기준으로 조정된 추천</Text>
-        <Text style={styles.cardDescription}>{checkIn.place} · {checkIn.hunger} · {checkIn.budget} · {checkIn.craving} 기준으로 추천을 조정했습니다.</Text>
-        <View style={styles.adjustmentWrap}>
-          {adjustmentModes.map((mode) => (
-            <View key={mode} style={styles.adjustmentButton}><AppButton label={mode} onPress={() => onAdjustRecommendation(mode)} variant="secondary" /></View>
-          ))}
-        </View>
-        {mealOptions.map((meal, index) => (
-          <View key={meal.title} style={[styles.mealRow, index !== mealOptions.length - 1 && styles.rowBorder]}>
-            <View style={styles.mealMain}>
-              <Text style={styles.mealTitle}>{meal.title}</Text>
-              <Text style={styles.mealMeta}>{meal.context} · {meal.tag}</Text>
-            </View>
-            <View style={styles.inlineAction}><AppButton label="선택" onPress={() => onSelectMeal(meal)} variant="secondary" /></View>
-          </View>
-        ))}
-      </SurfaceCard>
-
-      <SurfaceCard style={styles.spacedCard}>
         <View style={styles.inlineHeader}>
           <Text style={styles.sectionTitle}>최근 운영 상태</Text>
           <Text style={styles.sectionMeta}>{recentLogs.length}개 기록</Text>
@@ -90,18 +126,12 @@ export function HomeScreen({ goal, eatingStyle, constraints, mealOptions, recent
           <>
             <Text style={styles.latestTitle}>{latest.mealTitle}</Text>
             <Text style={styles.latestMeta}>최근 결과: {latest.result} · {new Date(latest.createdAt).toLocaleDateString('ko-KR')}</Text>
-            <Text style={styles.latestDescription}>이 결과를 기준으로 다음 끼니와 주간 요약이 자동 보정됩니다.</Text>
+            <Text style={styles.latestDescription}>이 결과를 기준으로 다음 추천과 복귀 흐름이 조정됩니다.</Text>
           </>
         ) : (
-          <Text style={styles.latestDescription}>아직 기록이 없습니다. 오늘 첫 체크인부터 시작하면 됩니다.</Text>
+          <Text style={styles.latestDescription}>아직 기록이 없습니다. 오늘 첫 추천을 고르고 가볍게 기록해 보세요.</Text>
         )}
         <View style={styles.actionGap}><AppButton label="전체 기록 보기" onPress={onOpenHistory} variant="secondary" /></View>
-      </SurfaceCard>
-
-      <SurfaceCard tone="soft" style={styles.spacedCard}>
-        <Text style={styles.cardLabel}>운영 원칙</Text>
-        <Text style={styles.principleTitle}>추천보다 중요한 건, 계속 맞춰지는 운영입니다.</Text>
-        <Text style={styles.principleDescription}>식단메이트는 단순 추천 앱이 아니라, 사용자의 현실 변수에 맞춰 식단·기록·복귀를 계속 조정하는 운영체제를 지향합니다.</Text>
       </SurfaceCard>
     </ScrollView>
   );
@@ -122,8 +152,12 @@ const styles = StyleSheet.create({
   utilityButton: { flex: 1 },
   adjustmentWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
   adjustmentButton: { minWidth: '47%' },
-  mealRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
-  rowBorder: { borderBottomWidth: 1, borderBottomColor: '#EEF1EA' },
+  defaultCard: { gap: 8 },
+  defaultBadge: { alignSelf: 'flex-start', backgroundColor: '#EEF8EE', color: colors.greenStrong, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, fontSize: 12, fontWeight: '700' },
+  defaultInfo: { fontSize: 13, color: colors.greenDeep, fontWeight: '600' },
+  altSection: { marginTop: 16, gap: 12 },
+  altTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+  mealRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
   mealMain: { flex: 1, paddingRight: 12 },
   mealTitle: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 4 },
   mealMeta: { fontSize: 13, color: colors.textMuted },
@@ -134,6 +168,4 @@ const styles = StyleSheet.create({
   latestTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 6 },
   latestMeta: { fontSize: 13, color: colors.greenDeep, fontWeight: '600', marginBottom: 8 },
   latestDescription: { fontSize: 15, lineHeight: 22, color: colors.textMuted },
-  principleTitle: { fontSize: 22, fontWeight: '800', color: '#1E3221', lineHeight: 30, marginBottom: 10 },
-  principleDescription: { fontSize: 15, lineHeight: 22, color: '#4E6151' },
 });

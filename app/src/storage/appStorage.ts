@@ -1,13 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Constraint, EatingStyle, Goal, MealLog } from '../types/app';
+import { AppEvent, Constraint, EatingStyle, Goal, MealLog, RecommendationSet } from '../types/app';
 
-const STORAGE_KEY = 'sikdanmate-app-state-v1';
+const STORAGE_KEY = 'sikdanmate-app-state-v2';
 
 export type PersistedAppState = {
+  hasCompletedOnboarding: boolean;
   goal: Goal;
   eatingStyle: EatingStyle;
   constraints: Constraint[];
   mealLogs: MealLog[];
+  eventLogs: AppEvent[];
+  lastRecommendation: RecommendationSet | null;
 };
 
 export async function loadAppState(): Promise<PersistedAppState | null> {
